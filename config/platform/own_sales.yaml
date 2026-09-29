@@ -1,0 +1,28 @@
+# Own sales (src/dip/own_sales.py): your Seller Central reports -- the ground truth the market estimates are checked
+# against. Recommended report: Business Reports -> "Detail Page Sales and Traffic by Child Item" (详情页面上的销售量与
+# 访问量 - 按子商品), exported for one period (a calendar month is best).
+
+columns:
+  # header synonyms per field (English and Chinese Seller Central); add synonyms here, never in code
+  asin:        [child asin, asin, 子asin, 子 asin, 子商品asin]
+  parent_asin: [parent asin, 父asin, 父 asin]
+  title:       [title, product name, 商品名称, 标题]
+  sku:         [sku, seller sku, 卖家sku]
+  units:       [units ordered, ordered units, units, 已订购商品数量, 订购数量, 已订购数量]
+  revenue:     [ordered product sales, product sales, sales, 已订购商品销售额, 销售额]
+  orders:      [total order items, order items, 订单商品总数, 订单商品数]
+  sessions:    [sessions total, sessions, "sessions - total", 会话次数总计, 会话次数, "会话次数 – 总计"]
+  page_views:  [page views total, page views, "page views - total", 页面浏览次数总计, 页面浏览次数]
+  conversion:  [unit session percentage, unit session percentage total, 商品会话百分比, 订单商品会话百分比]
+  buy_box:     [featured offer buy box percentage, buy box percentage, 推荐报价（购买按钮）百分比, 购买按钮赢得率]
+
+min_header_score: 0.7
+required: [asin, units]
+
+# a month is 30.44 days: every period is expressed as units per month before it is compared with anything
+days_per_month: 30.44
+
+estimate_check:
+  # a market observation of the same listing is compared with your actual when it was observed within this many
+  # days of the report period's midpoint
+  max_days_apart: 45

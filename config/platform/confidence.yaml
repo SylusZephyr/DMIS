@@ -1,0 +1,55 @@
+# Data Confidence Framework (Master Prompt 2, phase 1).
+# confidence = weighted mean of the components that can be measured, x 100.
+# A component with no evidence (e.g. history from a single snapshot) is left out
+# and its weight redistributed; the score is then capped (see caps) and the
+# reason list says why.
+
+weights:
+  source_reliability: 0.20
+  completeness: 0.25
+  verification: 0.35
+  historical_consistency: 0.20
+
+# How much a source is trusted before any record-level evidence. Keys are the
+# ingestion adapter names; unknown adapters use `default`.
+source_reliability:
+  sellersprite: 0.85      # third-party Amazon estimates (sales are modelled, not reported)
+  amazon_api: 0.95        # first-party marketplace data
+  api_json: 0.75
+  auto_detect: 0.60       # arbitrary spreadsheet, schema inferred
+  manual: 0.50
+  default: 0.60
+
+# Field weights for completeness (share of the listing's key fields present).
+completeness_fields:
+  price: 3
+  sales: 3
+  rating: 1
+  reviews: 1
+  brand: 1
+  launch_date: 1
+  image: 0.5
+
+verification:
+  min_reviews_for_verified_rating: 50
+  corroborating_listings: 2        # a product seen as >= this many listings is corroborated
+  high_quality_confidence: 80      # v1 quality score at/above this counts as "clean record"
+  checks:                          # weight of each check inside the verification component
+    sales_observed: 3
+    corroborated: 2
+    clean_record: 2
+    relevance_confirmed: 2
+    rating_verified: 1
+
+history:
+  min_snapshots: 2                 # below this, historical consistency is unknown
+  stable_cv: 0.25                  # coefficient of variation of sales at/below which history is "consistent"
+  unstable_cv: 1.0                 # at/above this it scores 0
+
+caps:
+  without_history: 90              # max confidence when consistency cannot be measured
+  without_sales: 60                # max confidence when no listing of the product has sales
+
+levels:                            # labels for the UI
+  high: 80
+  medium: 60

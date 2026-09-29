@@ -1,0 +1,14 @@
+# Product hierarchy discovery: Category -> Family -> Segment -> Model -> Variant -> Listing.
+# Families and segments come from v1 discovery; models first from shared specification
+# signatures (rpm, W, pack, model tokens); products with no shared signature are grouped
+# into text models (average-linkage clustering of their titles inside the segment).
+# A variant is one Product Master entity; its label is what distinguishes it in its model.
+text_models:
+  enabled: true
+  distance_threshold: 0.75   # cosine distance between titles (TF-IDF, brand removed)
+  min_size: 2                # a model needs at least this many products
+  max_group: 2000            # larger 'other' groups inside one segment are left as 'other'
+  label_terms: 2
+variants:
+  max_tokens: 3
+  common_share: 0.5          # a token found in >= this share of the model's products is not distinguishing

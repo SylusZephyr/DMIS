@@ -1,0 +1,622 @@
+<title>DMIS Presenter's Brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,650&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+:root{
+  --bg:#F4F7F6; --panel:#FFFFFF; --ink:#15211F; --ink2:#44524F; --ink3:#6C7B78; --line:#DCE4E2;
+  --accent:#0E7C6B; --accentSoft:#E1F1EE; --amber:#9A6412; --amberSoft:#FBF1DE; --bad:#B4412F;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#0E1514; --panel:#152120; --ink:#E3ECEA; --ink2:#B3C2BF; --ink3:#86958F; --line:#26403B;
+  --accent:#4FC3AE; --accentSoft:#173A34; --amber:#E0B060; --amberSoft:#33291A; --bad:#EE8B78;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#0E1514; --panel:#152120; --ink:#E3ECEA; --ink2:#B3C2BF; --ink3:#86958F; --line:#26403B;
+  --accent:#4FC3AE; --accentSoft:#173A34; --amber:#E0B060; --amberSoft:#33291A; --bad:#EE8B78;}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.6 var(--sans);padding:0 16px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;padding-block:28px 80px}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 20px);align-self:start;max-height:calc(100vh - 40px);overflow:auto;font-size:13px}
+nav.toc b{display:block;font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin-bottom:10px}
+nav.toc a{display:block;color:var(--ink2);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.hero{padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font:600 11px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+h1{font:650 clamp(30px,4.2vw,44px)/1.1 var(--serif);margin:10px 0 12px;text-wrap:balance}
+h2{font:650 26px/1.2 var(--serif);margin:0 0 12px;text-wrap:balance}
+h3{font:600 16px/1.35 var(--sans);margin:22px 0 6px}
+p,li{max-width:70ch;color:var(--ink2)}
+p{margin:0 0 10px}
+strong{color:var(--ink)}
+section{padding-block:34px;border-bottom:1px solid var(--line);scroll-margin-top:16px}
+code,.mono{font-family:var(--mono);font-size:.88em}
+code{background:var(--accentSoft);color:var(--ink);padding:1px 5px;border-radius:4px}
+.lede{font-size:17px;color:var(--ink2);max-width:66ch}
+.say{border-left:3px solid var(--accent);background:var(--panel);padding:14px 16px;margin:14px 0;font-family:var(--serif);font-size:17px;line-height:1.5;color:var(--ink)}
+.say small{display:block;font:600 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.tip{background:var(--amberSoft);border-radius:6px;padding:10px 14px;margin:12px 0;color:var(--ink);font-size:14px}
+.tip b{color:var(--amber)}
+.tbl{overflow-x:auto;margin:12px 0;border:1px solid var(--line);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:13.5px}
+th,td{text-align:left;vertical-align:top;padding:8px 12px;border-bottom:1px solid var(--line)}
+th{font:600 11px/1.3 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{white-space:nowrap;color:var(--ink);font-weight:500}
+td.w{white-space:normal}
+.nums{font-variant-numeric:tabular-nums}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:12px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px}
+.card h4{margin:0 0 4px;font:600 14px/1.3 var(--sans);color:var(--ink)}
+.card p{font-size:13.5px;margin:0}
+.big{font:650 26px/1 var(--serif);color:var(--accent);font-variant-numeric:tabular-nums}
+pre{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px 14px;overflow-x:auto;font:13px/1.55 var(--mono);color:var(--ink)}
+ol.flow,ul.plain{padding-left:20px}
+ol.flow li,ul.plain li{margin:4px 0}
+.tree{font:12.5px/1.6 var(--mono);white-space:pre;color:var(--ink2)}
+.tree b{color:var(--accent);font-weight:500}
+details{background:var(--panel);border:1px solid var(--line);border-radius:8px;margin:8px 0}
+summary{cursor:pointer;padding:11px 14px;font-weight:500;color:var(--ink);list-style:none;display:flex;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";font-family:var(--mono);color:var(--accent);width:12px;flex:none}
+details[open] summary::before{content:"–"}
+summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+details .a{padding:0 14px 12px 36px;color:var(--ink2)}
+details .a p{margin-bottom:6px}
+.qcat{font:600 11px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3);margin:22px 0 6px}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 10px}
+button{font:500 13px/1 var(--sans);background:var(--panel);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--accent);color:var(--accent)}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.formula{font-family:var(--mono);font-size:13px;background:var(--panel);border:1px dashed var(--line);padding:8px 12px;border-radius:6px;color:var(--ink);overflow-x:auto;white-space:pre}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:0}nav.toc{position:static;max-height:none;border-bottom:1px solid var(--line);padding-bottom:14px;columns:2;column-gap:16px}nav.toc b{column-span:all}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
+html{scroll-behavior:smooth}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <b>Brief</b>
+  <a href="#pitch">The pitch</a>
+  <a href="#run">Presentation run-sheet</a>
+  <a href="#problem">Problem &amp; big idea</a>
+  <a href="#stack">Architecture &amp; stack</a>
+  <a href="#hood">Under the hood: data &amp; connections</a>
+  <a href="#pipeline">Data pipeline</a>
+  <a href="#stats">The statistics, plainly</a>
+  <a href="#pages">Every page</a>
+  <a href="#files">File structure</a>
+  <a href="#config">Configuration</a>
+  <a href="#quality">Accuracy &amp; testing</a>
+  <a href="#findings">Real-data findings</a>
+  <a href="#limits">Limits &amp; roadmap</a>
+  <a href="#history">How it was built</a>
+  <a href="#glossary">Glossary</a>
+  <a href="#qa">Question drill</a>
+  <a href="#cmds">Commands</a>
+</nav>
+
+<main>
+<header class="hero">
+  <div class="eyebrow">DMIS · Dental Market Intelligence OS</div>
+  <h1>Everything you need to present DMIS and answer any question about it</h1>
+  <p class="lede">Read top to bottom once (about 35 minutes), then spend the rest of your hour on the question drill at the end. Green quotes are lines you can say out loud. Amber boxes are demo tips.</p>
+</header>
+
+<section id="pitch">
+  <h2>The 60-second pitch</h2>
+  <div class="say"><small>Say this</small>DMIS turns SellerSprite exports of Amazon US listings into a statistical picture of a product category: how big the market really is, who controls it, where the demand gaps are, whether it is growing, and which product we should launch. Every number carries a 95% confidence interval and its formula. The tool has been validated against markets where we know the true answer, and it works in English and Chinese.</div>
+  <p><strong>Three things make it different from a normal sales dashboard:</strong></p>
+  <ul class="plain">
+    <li><strong>It corrects the data's blind spot.</strong> Amazon only shows sales badges like "200+ bought in past month". Adding those up undercounts the market by about a third. DMIS models the real sales behind each badge.</li>
+    <li><strong>It never pretends to be certain.</strong> Every estimate has an interval, and every "significant" claim has passed a statistical test with false-discovery control.</li>
+    <li><strong>It is universal.</strong> Nothing is hard-coded for dental data. Category rules live in config files, and the maths works on any category's export.</li>
+  </ul>
+</section>
+
+<section id="run">
+  <h2>Presentation run-sheet (suggested order)</h2>
+  <p>This is a suggested demo path of about 15 minutes. Each step builds on the one before.</p>
+  <ol class="flow">
+    <li><strong>Command Center</strong> <code>/</code>: headline numbers, "Where to act" cards per market, leading brands, the 3D globe.</li>
+    <li><strong>Market Analytics</strong> <code>/markets/dental_models</code>: size with its interval and floor, evidence grade, click any <b>ⓘ</b> to show the formula. Expand a sub-category to show brands, price bands and momentum.</li>
+    <li><strong>Opportunity Board</strong> <code>/opportunities</code>: the direct answer to "what should we sell?". Sort by a column, expand a row.</li>
+    <li><strong>Launch Simulator</strong>: open it from a board row (pre-filled), add a unit cost, show the profit distribution and the price curve.</li>
+    <li><strong>Competitors &amp; Trends</strong>: brand shares with intervals and P(#1), strengths and weaknesses.</li>
+    <li><strong>Market Analyst</strong>: ask "What should we sell in dental models?" then switch to 中文.</li>
+    <li><strong>Knowledge Graph and Product Galaxy</strong>: the visual wow moment. Click an edge to show its evidence.</li>
+    <li><strong>Accuracy</strong> <code>/accuracy</code>: close with trust. Show validation against known truth.</li>
+    <li><strong>Methodology</strong>: every formula is documented in the app.</li>
+  </ol>
+  <div class="tip"><b>Demo tip:</b> Switch EN ↔ 中文 at the bottom of the sidebar at least once. The whole UI changes, including chart labels and the analyst's answers. Narrow the browser to show the mobile menu.</div>
+</section>
+
+<section id="problem">
+  <h2>The problem and the big idea</h2>
+  <h3>What the input looks like</h3>
+  <p>The input is a <strong>SellerSprite export</strong> (Excel or CSV) of Amazon US listings. It has title, brand, price, rating, reviews, launch date, category, and a sales column that is usually a <strong>badge</strong> ("50+", "100+", "200+ bought"). The raw files live in <code>data/raw/</code> and are <strong>never modified</strong>: they are the evidence.</p>
+  <h3>Three core principles (from PRINCIPLES.md)</h3>
+  <div class="grid2">
+    <div class="card"><h4>Listing ≠ Product</h4><p>One product can be sold through many ASINs (colours, bundles, sellers). DMIS groups listings into products and never counts listings as product types.</p></div>
+    <div class="card"><h4>Code calculates, AI interprets</h4><p>Python and DuckDB do all the maths. AI is used only for meaning: relevance, classification and phrasing. It never produces a number.</p></div>
+    <div class="card"><h4>Never silently discard</h4><p>Every excluded listing keeps a reason ("rejected: …", "not relevant: …", "low data quality: …"), visible on Data Operations.</p></div>
+  </div>
+  <h3>The badge problem, in one picture</h3>
+  <p>A badge is a <strong>range</strong>, not a number. "200+" means 200 to 299 on a ladder of 50, 100, 200, 300 … 900, 1K, 2K … 5K, 10K … A listing with <em>no</em> badge sells <strong>below 50</strong>, not zero. Summing the badge floors gives a <strong>certain lower bound</strong> (the "floor"). On synthetic markets that floor is about <strong>34% below the truth</strong>. DMIS treats each listing as an <em>interval-censored</em> observation and estimates where inside the interval its true sales most likely are.</p>
+  <div class="say"><small>Say this</small>Other tools add up the badges and report the floor. We treat each badge as a range, fit a demand model to all listings at once, and estimate the real total. On test markets with known truth we're within about 2%, against 34% for the badge sum.</div>
+</section>
+
+<section id="stack">
+  <h2>Architecture and tech stack</h2>
+  <div class="tbl"><table>
+    <tr><th>Layer</th><th>Technology</th><th>What it does</th></tr>
+    <tr><td>Backend API</td><td class="w">Python, <strong>FastAPI</strong> (<code>src/dip/api</code>), routes under <code>/api/v2</code></td><td class="w">Serves every number to the UI. Auto docs at <code>localhost:8000/docs</code>.</td></tr>
+    <tr><td>Data lake</td><td class="w"><strong>Parquet</strong> files queried with <strong>DuckDB</strong> (<code>storage/lake.py</code>)</td><td class="w">Curated tables per market: listings, products, segments, brands, gaps, revenue_history…</td></tr>
+    <tr><td>Business DB</td><td class="w"><strong>SQLite</strong> by default, <strong>PostgreSQL</strong> if <code>DIP_POSTGRES_URL</code> is set (SQLAlchemy)</td><td class="w">Markets, users, projects, alerts, events, audit log, jobs, organisations.</td></tr>
+    <tr><td>Knowledge graph</td><td class="w">Embedded <strong>NetworkX</strong>, or <strong>Neo4j</strong> if configured</td><td class="w">Typed ontology with evidence on every edge.</td></tr>
+    <tr><td>Vectors</td><td class="w">Embedded store or <strong>Qdrant</strong></td><td class="w">Title similarity: similar products, galaxy layout.</td></tr>
+    <tr><td>Ingestion</td><td class="w"><strong>Polars</strong> streaming</td><td class="w">Handles 10⁶+ rows.</td></tr>
+    <tr><td>Statistics</td><td class="w">NumPy, <strong>SciPy</strong>, scikit-learn, XGBoost (relevance)</td><td class="w">Demand model, bootstrap, tests.</td></tr>
+    <tr><td>Frontend</td><td class="w"><strong>Next.js 16 / React 19</strong>, Tailwind, <strong>ECharts</strong>, <strong>three.js</strong> (react-three-fiber)</td><td class="w">About 25 pages, 3D globe, galaxy and graph.</td></tr>
+    <tr><td>AI (optional)</td><td class="w"><strong>Google Gemini</strong> (<code>gemini-2.5-flash</code>, free tier) via <code>GEMINI_API_KEY</code></td><td class="w">Only rephrases the analyst's computed facts, with a number guard.</td></tr>
+    <tr><td>Deploy</td><td class="w">Docker, job queue worker, backup/restore scripts</td><td class="w">Runs fully offline on a laptop too.</td></tr>
+  </table></div>
+  <p>Two codebases live side by side. <code>src/dmie</code> is the <strong>v1 engine</strong> (original algorithms: cleaning, matching, classification), which is wrapped rather than rewritten. <code>src/dip</code> is the <strong>platform v2</strong>, where metrics v3, the API and all intelligence live. The sidebar footer says "Platform v2 · Core v1 inside".</p>
+</section>
+
+<section id="hood">
+  <h2>Under the hood: how the pieces connect</h2>
+  <h3>The path of one click</h3>
+  <ol class="flow">
+    <li>The browser loads a page from <strong>Next.js</strong> on port 3000. Each page is a React client component (<code>"use client"</code>).</li>
+    <li>The page calls <code>useApi("/markets/…")</code> (<code>frontend/lib/hooks</code>), which does <code>fetch("/api/v2/…")</code> with an optional <code>Authorization: Bearer</code> token from localStorage (<code>frontend/lib/api.ts</code>).</li>
+    <li><strong>Next.js rewrites</strong> <code>/api/v2/*</code> to the FastAPI server (default <code>http://127.0.0.1:8000</code>, overridable with <code>DIP_API_URL</code>) in <code>next.config.ts</code>. Browser and API share one origin, so no CORS is needed.</li>
+    <li><strong>FastAPI</strong> (<code>src/dip/api/app.py</code> plus <code>routes/*.py</code>) checks the role and market scope (<code>auth.py</code>: <code>require("markets","read")</code>, <code>assert_market</code>), then reads data.</li>
+    <li>Market tables are read from <strong>Parquet via DuckDB</strong> (<code>lake.read_curated(table, market)</code>). Business records are read with <strong>SQLAlchemy</strong> sessions (<code>business.session()</code>).</li>
+    <li>Read endpoints are memoised by <code>@response_cache</code> per (arguments, data version, market scope), so repeat views are instant and a new upload invalidates them.</li>
+    <li>The JSON goes back to the page, which draws it with ECharts or three.js.</li>
+  </ol>
+
+  <h3>How each database is connected</h3>
+  <div class="tbl"><table>
+    <tr><th>Store</th><th>How it connects</th><th>Default · Production switch</th></tr>
+    <tr><td>Business DB</td><td class="w"><code>settings.business_url</code> goes to SQLAlchemy <code>create_engine(url)</code>, cached per URL. On first connect it runs <code>create_all</code>, an <strong>additive migration</strong> (adds missing nullable columns, never drops) and seeds default permissions. Code uses <code>with business.session() as s:</code>.</td><td class="w"><code>sqlite:///data/platform/business.db</code> · set <code>DIP_POSTGRES_URL=postgresql://…</code></td></tr>
+    <tr><td>Data lake</td><td class="w">Parquet files at <code>&lt;DIP_LAKE_DIR&gt;/curated/&lt;table&gt;/market=&lt;name&gt;/data.parquet</code> (Hive-style partition per market). DuckDB runs SQL straight on them: <code>SELECT … FROM read_parquet(…)</code>. There is no server to run.</td><td class="w"><code>data/lake/</code> · point <code>DIP_LAKE_DIR</code> elsewhere</td></tr>
+    <tr><td>Analytics DB</td><td class="w">A DuckDB file for analytical queries.</td><td class="w"><code>data/platform/analytics.duckdb</code> · <code>DIP_DUCKDB_PATH</code></td></tr>
+    <tr><td>Graph</td><td class="w"><code>get_graph_store()</code> returns the <strong>embedded</strong> store (NetworkX in memory, persisted to <code>graph.duckdb</code>), or <strong>Neo4j</strong> when <code>DIP_NEO4J_URI</code>, <code>_USER</code> and <code>_PASSWORD</code> are set. Both expose the same interface (<code>neighbourhood</code>, <code>find_path</code>, <code>stats</code>).</td><td class="w">embedded · Neo4j</td></tr>
+    <tr><td>Vectors</td><td class="w"><code>get_vector_store()</code> uses the <strong>Qdrant client</strong>: local file mode by default, or a Qdrant server with <code>DIP_QDRANT_URL</code> and <code>DIP_QDRANT_API_KEY</code>. Embeddings are <strong>offline</strong>: word 1–2-gram and character 3–5-gram hashing, randomly projected to 256 dimensions and L2-normalised. No external model or API is needed.</td><td class="w">Qdrant local · Qdrant server</td></tr>
+  </table></div>
+  <p>All switches are read once in <code>src/dip/settings.py</code> (a frozen <code>Settings</code> dataclass behind <code>lru_cache</code>). The data directories are created automatically. <code>GET /api/v2/health</code> reports which backend each store is using.</p>
+
+  <h3>Main business tables (29)</h3>
+  <p class="mono" style="font-size:12.5px">users, api_tokens, permissions, employees, categories, ownership, companies, suppliers, datasets, jobs, markets, events, alerts, ai_traces, organizations, usage, supplier_interactions, job_queue, audit_log, projects, project_events, comments, messages, scope_decisions, label_samples, label_items, labels, user_feedback, page_views</p>
+  <p><code>markets.summary</code> is a JSON column holding each market's headline v3 numbers (<code>metrics_v3.revenue_month</code>, evidence grade, as-of date…).</p>
+
+  <h3>Main lake tables (per market)</h3>
+  <p class="mono" style="font-size:12.5px">records (every input row + excluded_reason), listings, products, segments, families, metrics (every number with interval, n, formula, basis), brands, segment_brands, brand_history, revenue_history, cohorts, momentum, gaps, recommendations, demand_model (model card), competitors, trends, forecasts, pain, supplier_matches, dedup_pairs, scope</p>
+
+  <h3>Jobs, auth and caching</h3>
+  <ul class="plain">
+    <li><strong>Upload processing:</strong> by default a background <strong>thread</strong> in the API. With <code>DIP_JOB_MODE=queue</code>, the API writes to <code>job_queue</code> and a separate <code>dmis.py worker</code> processes jobs, which suits production. Stage progress is written to <code>jobs</code> and polled by the UI.</li>
+    <li><strong>Auth:</strong> <code>Authorization: Bearer dmis_…</code> tokens. Only the <strong>SHA-256 hash</strong> is stored. Tokens expire after 90 days, and permissions are checked per role, resource and action. <code>DIP_AUTH=off</code> runs as a local admin for laptop use.</li>
+    <li><strong>Audit:</strong> middleware records every POST, PUT, PATCH or DELETE (user, route, status). Read-only computations such as simulations and questions are excluded.</li>
+    <li><strong>Galaxy layout:</strong> segment centres are placed around a sphere. Inside a segment, products are spread by the first 3 SVD components of their title embeddings, and the coordinates (<code>gx, gy, gz</code>) are stored on products.</li>
+  </ul>
+</section>
+
+<section id="pipeline">
+  <h2>The data pipeline: what happens on upload</h2>
+  <p>You upload a file on <strong>Data Operations</strong> with a market name and, ideally, a <strong>snapshot date</strong>. A background job runs these stages, and each stage's time and memory is shown live. The code is in <code>src/dip/pipeline/runner.py</code>.</p>
+  <div class="tbl"><table>
+    <tr><th>Stage</th><th>What it does</th></tr>
+    <tr><td>ingestion</td><td class="w">Reads Excel, CSV or JSON and detects columns automatically, in any language (e.g. Chinese headers).</td></tr>
+    <tr><td>cleaning</td><td class="w">Validates prices and ratings and flags quality issues. Nothing is deleted.</td></tr>
+    <tr><td>relevance</td><td class="w">Is this listing really in the category? Rules come from <code>config/categories.yaml</code>, with an optional XGBoost model. Uncertain listings go to a review queue.</td></tr>
+    <tr><td>category_scope</td><td class="w">Decides which marketplace sub-categories belong to the market. You can override this on the Market page.</td></tr>
+    <tr><td>clustering</td><td class="w">Discovers families and segments (sub-categories) from titles and specs, plus keywords and EN/ZH descriptions.</td></tr>
+    <tr><td>product_resolution</td><td class="w">Groups listings into products (Listing ≠ Product) and builds the Family → Segment → Model → Variant → Listing hierarchy.</td></tr>
+    <tr><td>history, trends, forecasting</td><td class="w">Snapshot history, trend labels, and legacy forecasts.</td></tr>
+    <tr><td><strong>metrics</strong></td><td class="w"><strong>Metrics engine v3</strong>: the demand model, joint simulation, every estimate and interval.</td></tr>
+    <tr><td>analytics, opportunity, competitors, confidence</td><td class="w">Market and segment metrics, opportunity scores, brand intelligence, data-confidence scores.</td></tr>
+    <tr><td>gaps</td><td class="w">Statistically significant demand gaps, leading to the recommended product.</td></tr>
+    <tr><td>customer_pain</td><td class="w">Review themes when review text exists; otherwise a rating-based quality gap.</td></tr>
+    <tr><td>suppliers</td><td class="w">Matches your supplier list to segments.</td></tr>
+    <tr><td>knowledge_graph, vectors</td><td class="w">Builds the ontology and the similarity index.</td></tr>
+    <tr><td>lake</td><td class="w">Writes every curated table, including <code>revenue_history</code> (for growth), <code>brand_history</code> and <code>segment_brands</code>.</td></tr>
+    <tr><td>events</td><td class="w">Compares with the previous snapshot and raises alerts only for statistically significant changes.</td></tr>
+  </table></div>
+  <div class="tip"><b>If asked "what if I upload the same month twice?":</b> history is keyed by snapshot period, so the re-upload replaces that period instead of double-counting it.</div>
+</section>
+
+<section id="stats">
+  <h2>The statistics, explained plainly</h2>
+  <p>Every formula has an ID (M1.1, M2.1 …) that links to <code>docs/METHODOLOGY.md</code> and the in-app Methodology page. These are the ones you must be able to explain.</p>
+
+  <h3>1 · Badge detection (M1.1, <code>observation.py</code>)</h3>
+  <p>If at least 98% of observed sales values sit exactly on the ladder (50, 100, 200 …), the column is treated as badges. Otherwise the values are treated as exact sales. The decision comes from the data itself.</p>
+
+  <h3>2 · The demand model (M1.2, <code>demand.py</code>)</h3>
+  <div class="formula">log(units) = b0 + b·z + σ·ε      z = standardised log price, rating, log age, sub-category
+ε ~ Normal, or Student-t (df 10, 5, 3) for heavy tails, chosen by AIC</div>
+  <p>The model is fitted by <strong>maximum likelihood on intervals</strong>: a listing with "200+" contributes the probability that its sales fall in [200, 300), and a listing with no badge contributes P(sales &lt; 50). This is called <strong>interval-censored regression</strong>. A small ridge penalty keeps it stable. With few badged listings it falls back to an intercept-only model.</p>
+  <p><strong>Bootstrap</strong> (60 refits, parametric) captures parameter uncertainty and corrects small-sample bias. Each refit also re-chooses the error family.</p>
+
+  <h3>3 · Listing estimate (M1.3)</h3>
+  <p>For each listing: the expected sales <em>given</em> its badge range (the conditional mean), plus a 95% interval. The estimate always stays inside the observed range.</p>
+
+  <h3>4 · Market, segment, brand and product totals (M1.4)</h3>
+  <p><strong>400 joint simulations</strong> draw every listing at once and sum by group. The interval comes from those draws, widened by <code>interval_inflation</code> = 1.3, a factor <strong>calibrated</strong> on synthetic markets so that 95% intervals really cover 95%. The point estimate is the <strong>sum of the listing estimates</strong>, and the draws are rescaled to it. As a result, <strong>every level adds up exactly</strong>: listings, products, brands, segments and the market.</p>
+  <p>The market card shows three numbers: the <strong>floor</strong> (certain lower bound), the <strong>estimate</strong> with its 95% interval, and the <strong>ceiling</strong> (the sum of upper bounds, when all listings are bounded).</p>
+
+  <h3>5 · Concentration: HHI (M2.1)</h3>
+  <div class="formula">HHI = Σ (brand share × 100)²    range 0–10,000 · above 2,500 = highly concentrated
+effective competitors = 10,000 / HHI</div>
+  <p>Shares come from the simulation, so HHI has an interval too. <strong>P(#1)</strong> is the fraction of simulations in which a brand ranks first. A brand is a <strong>"leader"</strong> when P(#1) ≥ 50%. It is "above par" or "below par" only when its whole interval sits above or below the equal-share benchmark (1 ÷ effective competitors).</p>
+
+  <h3>6 · Entry: entrant success rate (M3.x)</h3>
+  <p>An <strong>entrant</strong> is a listing launched in the last 365 days. Success means reaching the median sales of established listings. Segments with fewer than 5 entrants are <strong>shrunk toward the market rate</strong> (empirical Bayes, prior strength 5), so one lucky listing can't make a segment look easy.</p>
+
+  <h3>7 · Unit economics (M4)</h3>
+  <div class="formula">unit margin = price × (1 − referral fee 15%) − fulfilment fee − unit cost</div>
+  <p>A cost column that is almost a fixed percentage of price is detected as <strong>derived from price</strong> and never used as a real cost. Without genuine costs, profit is not shown.</p>
+
+  <h3>8 · Quality gap (M5)</h3>
+  <p>The share of demand going to listings rated below 4.0. It is a customer-pain proxy used when there is no review text. The <strong>rating bar</strong> is the median rating of the top 10% of listings by revenue.</p>
+
+  <h3>9 · Opportunity index 0–100 (M7)</h3>
+  <p>A <strong>weighted geometric mean</strong> of six components, each mapped to 0–1 on an <em>absolute</em> scale so markets are comparable:</p>
+  <div class="tbl"><table>
+    <tr><th>Component</th><th>Weight</th><th>Scale (0 → 1)</th></tr>
+    <tr><td>Demand</td><td class="nums">0.25</td><td class="w">segment revenue, log scale: $1k → 0, $1M/month → 1</td></tr>
+    <tr><td>Entry</td><td class="nums">0.25</td><td class="w">entrant success 0% → 0, 60% → 1</td></tr>
+    <tr><td>Margin</td><td class="nums">0.20</td><td class="w">median margin 0% → 0, 40% → 1</td></tr>
+    <tr><td>Competition</td><td class="nums">0.15</td><td class="w">HHI 5,000 → 0, 1,000 → 1</td></tr>
+    <tr><td>Quality gap</td><td class="nums">0.10</td><td class="w">upside only: no gap = neutral 0.5, 40% gap → 1</td></tr>
+    <tr><td>Saturation</td><td class="nums">0.05</td><td class="w">95% "dead" listings → 0, 50% → 1</td></tr>
+  </table></div>
+  <p><strong>Why geometric?</strong> A zero in one component (for example, impossible entry) drags the whole index down. An arithmetic average would hide that. Missing components are left out and the <strong>coverage</strong> is shown. A <strong>product</strong> index = 0.7 × its segment + 0.2 × its price-band position + 0.1 × its quality room (also geometric).</p>
+
+  <h3>10 · Evidence grade A–D</h3>
+  <p><strong>A:</strong> ≥ 50 listings, ≥ 25% badged, hold-out AUC ≥ 0.75. <strong>B:</strong> ≥ 20, ≥ 10%, AUC ≥ 0.65. <strong>C:</strong> ≥ 10, ≥ 5% badged. Otherwise <strong>D</strong>. The <strong>AUC</strong> comes from 5-fold cross-validation: can the model tell which listings earned a badge without seeing their badge? 0.5 is chance.</p>
+
+  <h3>11 · Demand gaps and the recommended product (M10)</h3>
+  <p>For every segment with ≥ 8 listings, every candidate feature (a title term like "teaching", a bucketed spec like "rpm 40k–60k", or a price band) gets a <strong>lift</strong>: demand per listing with the feature ÷ without it, with a <strong>bootstrap interval</strong> (400 resamples). The p-values are corrected with <strong>Benjamini–Hochberg</strong> (false discovery rate 10%). A feature is a <strong>gap</strong> when it is significant and under-supplied. The <strong>recommended product</strong> combines up to 3 co-occurring gap features with the best price band. If no gap is significant, it recommends the best price band only.</p>
+
+  <h3>12 · Significance for alerts (M8, <code>significance.py</code>)</h3>
+  <div class="formula">z = (log after − log before) / √(se_before² + se_after²),   se from each 95% interval</div>
+  <p>All changes in one run are BH-adjusted. Only q ≤ 0.05 becomes an alert. Changes that are not significant stay in the log as "info". With exact data (no uncertainty), any change is certain.</p>
+
+  <h3>13 · Growth and forecast (M15, <code>forecast.py</code>)</h3>
+  <p>This needs <strong>≥ 3 dated monthly snapshots</strong>. It fits a <strong>random-effects log-linear trend</strong>: each snapshot is weighted by its own uncertainty plus real month-to-month variation τ², estimated by the method of moments (DerSimonian–Laird). Outputs:</p>
+  <ul class="plain">
+    <li>growth per month with a t interval, and a p-value for "trend = 0"</li>
+    <li>direction: growing, declining, or no significant trend</li>
+    <li>3, 6 and 12-month forecasts with 95% <strong>prediction</strong> intervals; ⚠ marks a horizon longer than the history</li>
+  </ul>
+  <p>Seasonality is not modelled until 24 monthly snapshots exist. Validation: the intervals covered the truth 96–100% of the time on simulated series.</p>
+
+  <h3>14 · Launch simulator (M12, <code>metrics/launch.py</code>)</h3>
+  <p>The fitted demand model is stored as a <strong>model card</strong>. For a new idea (title, price, optional cost), DMIS places it in the closest segment by text similarity and draws <strong>posterior-predictive</strong> sales for a new listing. It then outputs:</p>
+  <ul class="plain">
+    <li>units, revenue and profit as distributions: median, p10–p90, P(profit &gt; 0), P(reaching the target)</li>
+    <li>break-even and payback</li>
+    <li>a price curve</li>
+    <li>the gaps the idea covers and the risks it runs</li>
+    <li>what real entrants in that segment actually sell</li>
+  </ul>
+  <p>Scenarios use <strong>common random numbers</strong>, so differences between prices come from the price, not from noise. The price effect is a cross-sectional association, <em>not</em> a causal elasticity, and the UI says so.</p>
+
+  <h3>15 · Shopping mode (M13)</h3>
+  <p>For buyers. Products are compared on four criteria: requirement match, <strong>Bayesian rating</strong> (a rating shrunk toward the market mean by review count), proven demand (the lower bound of sales) and price. The <strong>Pareto front</strong> is the set of products no other product beats on every criterion. A dominated product names the product that beats it.</p>
+
+  <h3>16 · Knowledge graph (M14)</h3>
+  <p>Every edge has <code>evidence</code>, a <code>basis</code> (fact, estimate, test or similarity) and a <code>strength</code> (0–1). Path finding uses weight 1 + (1 − strength), so among equally short paths the best-evidenced one wins. Edges that are not significant are never drawn.</p>
+
+  <h3>17 · Inside a sub-category and product position (M16)</h3>
+  <p>Top brands with share intervals and P(#1), demand per listing by price band (bootstrap, 2,000 resamples, fixed seed), and launch momentum (an exact binomial test: launches in the last year vs the year before). A product's <strong>percentile</strong> is the share of peers below it, with ties counted half.</p>
+
+  <h3>18 · Opportunity Board (M17, <code>board.py</code>)</h3>
+  <p>For each market's top 8 sub-categories by opportunity index, the board shows the gaps engine's concept, priced at the geometric middle of its range. When the segment is too small, it uses the typical product at the median price and says so. Each concept is simulated with the launch simulator and joined with growth, the leading brand and entry. <strong>Nothing is re-scored.</strong></p>
+
+  <div class="say"><small>Say this if asked "why so much statistics?"</small>Because a sales dashboard that shows one number invites overconfidence. A launch decision needs to know the range of outcomes and whether a difference is real or noise. Every technique here answers one of those two questions.</div>
+</section>
+
+<section id="pages">
+  <h2>Every page, what it answers, and what to click</h2>
+  <p>The sidebar groups pages into Intelligence, Decisions, Workflow, Quality, Operations and Modes. On phones it collapses into a ☰ menu.</p>
+  <div class="tbl"><table>
+    <tr><th>Page</th><th>Question it answers</th><th>Show this</th></tr>
+    <tr><td>Command Center <code>/</code></td><td class="w">Where should we act?</td><td class="w">KPI strip (estimated revenue with certain floor), "Where to act" cards per market (size interval, grade, best segment, recommendation), leading brands, 3D globe of markets and suppliers.</td></tr>
+    <tr><td>Market Universe</td><td class="w">How is the industry structured?</td><td class="w">Industry → branches → markets → segments. Size = revenue, colour = opportunity, glow = new-listing share.</td></tr>
+    <tr><td>Product Galaxy</td><td class="w">What does the product landscape look like?</td><td class="w">Products as stars placed by title similarity. Colour by segment, brand, price quartile, opportunity, margin or entrant; links for similar, brand and segment; compare up to 4. Large markets draw the top 3,000 by revenue and show the share drawn.</td></tr>
+    <tr><td>Market Analytics</td><td class="w">How big, how concentrated, how open is one market?</td><td class="w">Size tiles with ⓘ explanations, recommended product, segments ranked by opportunity (expand one for brands, price bands and momentum), price × demand scatter with snapshot time control, growth &amp; forecast chart, customer pain, category boundary control, hierarchy link.</td></tr>
+    <tr><td>Hierarchy</td><td class="w">Which listings make up which product?</td><td class="w">Category → Family → Segment → Model → Variant → Listing, with estimated revenue.</td></tr>
+    <tr><td>Knowledge Graph</td><td class="w">How are things connected, and why?</td><td class="w">Click an edge to see its evidence; pick two nodes to see the path; filter by edge type and strength.</td></tr>
+    <tr><td>Opportunity Board</td><td class="w"><strong>What should we sell?</strong></td><td class="w">Sortable concepts with simulated units and revenue, P(revenue ≥ $5k), growth, leader, entry and risk dots. Expand for "why this concept" and a one-click simulation.</td></tr>
+    <tr><td>Market Analyst</td><td class="w">Ask in plain English or Chinese.</td><td class="w">Intents: size, opportunity, recommend, competitors, entry, economics, growth, launch, why, compare. Every fact has a verify link. Gemini phrasing is rejected if it adds any number not in the facts.</td></tr>
+    <tr><td>Launch Simulator</td><td class="w">What happens if we launch X at $Y?</td><td class="w">Distributions, P(profit &gt; 0), break-even, price curve, gaps covered, risks, real-entrant check, scenario comparison.</td></tr>
+    <tr><td>Competitors &amp; Trends</td><td class="w">Who leads and where are they weak?</td><td class="w">HHI, effective competitors, equal-share benchmark, brand table (share interval, P(#1), price index, Bayesian rating, entrants, strengths and weaknesses), cohorts, momentum, significance-tested snapshot changes.</td></tr>
+    <tr><td>Alerts &amp; Events</td><td class="w">What changed that matters?</td><td class="w">Alerts per owner, each with its z-test and q-value; the event log; live data connectors.</td></tr>
+    <tr><td>Product Pipeline</td><td class="w">Where are our ideas?</td><td class="w">Opportunity → evaluation → supplier search → prototype → launch decision (manager approval) → launched. The prediction is a v3 launch simulation. After launch, actual sales are checked against the p10–p90 prediction.</td></tr>
+    <tr><td>Inbox · Audit · Org</td><td class="w">Admin side</td><td class="w">Daily summaries and messages; who changed what (read-only actions are excluded); plan, usage, API tokens.</td></tr>
+    <tr><td>Accuracy</td><td class="w">Can we trust the numbers?</td><td class="w">"Run validation" on synthetic markets, per-market hold-out AUC (pass/watch/fail), human-label precision and recall, launch predictions vs reality.</td></tr>
+    <tr><td>Accuracy labelling</td><td class="w">Human ground truth</td><td class="w">Label a random stratified sample of about 50 products per market. This is the only source of precision and recall.</td></tr>
+    <tr><td>Feedback &amp; usage</td><td class="w">Pilot tracking</td><td class="w">"This looks wrong" reports (a button on every page) and page views.</td></tr>
+    <tr><td>Data Operations</td><td class="w">Load data</td><td class="w">Upload, live stage progress, excluded records with reasons, relevance corrections.</td></tr>
+    <tr><td>Methodology</td><td class="w">How is X computed?</td><td class="w">The full METHODOLOGY.md, sections 1–17.</td></tr>
+    <tr><td>Suppliers</td><td class="w">Who can make it?</td><td class="w">Supplier list, cooperation history, ranking by fit, price, lead time and reliability.</td></tr>
+    <tr><td>My Portfolio</td><td class="w">What should I (a PM) do today?</td><td class="w">Owned categories, prioritised actions with their numbers, market status.</td></tr>
+    <tr><td>Shopping Mode</td><td class="w">Which product should a buyer pick?</td><td class="w">Needs → Pareto-ranked products with adjustable weights.</td></tr>
+    <tr><td>Product page</td><td class="w">Everything about one product</td><td class="w">Estimates with intervals, <strong>position in its sub-category</strong> (percentiles plus peer scatter), "Simulate a launch like this", data-confidence breakdown, listings, competitors, suppliers, similar products.</td></tr>
+  </table></div>
+</section>
+
+<section id="files">
+  <h2>File structure</h2>
+  <p>Repository <code>github.com/SylusZephyr/DMIS-</code>, branch <code>main</code>.</p>
+  <div class="tbl"><div class="tree" style="padding:14px">
+<b>PRINCIPLES.md</b>              project rules (listing ≠ product, raw data immutable, config not hard-code …)
+<b>PROGRESS.md</b>             status, what's done, what's left
+README.md · run_platform.sh/.bat · setup_local.sh/.bat   one-click local setup
+pyproject.toml         Python dependencies · Dockerfile · infra/ (deploy)
+<b>config/</b>
+  categories.yaml      category definitions + relevance rules (no hard-coding in code)
+  <b>platform/metrics.yaml</b> every statistical setting (ladder, simulations, weights, grades, forecast, board…)
+  platform/analyst.yaml  Gemini model + analyst settings · plans.yaml · confidence.yaml · sourcing.yaml …
+<b>data/</b>
+  raw/                 SellerSprite exports (dental_models, denture_base, implants) — never modified
+  lake/ · platform/    generated: Parquet lake, SQLite business DB (not committed)
+  templates/           supplier CSV template
+<b>src/dmie/</b>             v1 engine (cleaning, matching, classification, reviews) — wrapped, not rewritten
+<b>src/dip/</b>              platform v2
+  <b>pipeline/runner.py</b>   the upload pipeline (all stages) + ingestion/ cleaning/ relevance/ clustering/ …
+  <b>metrics/</b>             the statistical core
+    observation.py       badge-ladder detection
+    demand.py            interval-censored model, bootstrap, simulation, model card
+    engine.py            metrics v3: size, shares, HHI, entry, economics, opportunity, grade
+    gaps.py · brands.py · launch.py · shopping.py · forecast.py · bands.py · board.py · synthetic.py
+  intelligence/        analyst_v3.py, gemini.py, ontology.py (graph), confidence.py, briefs.py …
+  significance.py      z-tests + Benjamini–Hochberg for alerts
+  projects.py          product pipeline · pilot/accuracy.py · audit.py · auth.py (roles) · tenancy.py
+  storage/             lake.py (DuckDB/Parquet) · business.py (SQL) · graph.py · vectors.py
+  api/routes/          metrics.py (v3 endpoints) · catalog.py · intelligence.py · enterprise.py · workflow.py …
+<b>frontend/</b>             Next.js app
+  app/&lt;page&gt;/page.tsx  one folder per page (opportunities, markets, launch, competitors, galaxy …)
+  components/          nav, metric (ⓘ explain), forecast-card, segment-detail, product-position, three/ (3D)
+  messages/en.ts, zh.ts  all UI text (about 1,250 keys) · lib/i18n.tsx · lib/basis-zh.ts
+  scripts/check-i18n.mjs  CI guard: keys match + no hard-coded English
+<b>tests/</b>                673 tests: platform/ (metrics, acceptance, API) · engine/ · unit/ · integration/
+<b>docs/</b>                 <b>METHODOLOGY.md</b> (every formula) · USER_MANUAL · API_DOCUMENTATION · ACCURACY_STRATEGY …
+scripts/dmis.py        CLI: bootstrap, process, serve, worker, backup, restore, create-user …
+  </div></div>
+</section>
+
+<section id="config">
+  <h2>Configuration: "no hard-coding"</h2>
+  <p>This is the answer to "does it only work for dental?". <strong>No.</strong> Everything category-specific or tunable is in YAML:</p>
+  <ul class="plain">
+    <li><code>config/categories.yaml</code>: what belongs in a category (include and exclude terms, sub-categories). A new category needs a new entry here, not code.</li>
+    <li><code>config/platform/metrics.yaml</code>: the badge ladder, error families, bootstrap and simulation counts, interval inflation 1.3, entrant window 365 days, referral fee 15%, opportunity weights and scales, evidence grades, gap settings (FDR 10%), alert FDR 5%, forecast (min 3 periods), board size (8).</li>
+    <li><code>config/platform/analyst.yaml</code>: Gemini model, number tolerance, top-N.</li>
+    <li><code>plans.yaml</code> (tenancy limits, token lifetime 90 days), <code>confidence.yaml</code>, <code>sourcing.yaml</code> (supplier scoring weights).</li>
+    <li>Secrets live in <code>.env</code>, which is never committed: <code>GEMINI_API_KEY</code>, <code>DIP_POSTGRES_URL</code>, <code>DIP_NEO4J_URI</code>, <code>DIP_QDRANT_URL</code>, <code>DIP_AUTH</code>.</li>
+  </ul>
+</section>
+
+<section id="quality">
+  <h2>Accuracy and testing: the trust story</h2>
+  <div class="grid2">
+    <div class="card"><div class="big">1.7%</div><p>median error of market size on synthetic markets with known truth (12-market validation run)</p></div>
+    <div class="card"><div class="big">100%</div><p>of synthetic markets' true size inside the 95% interval</p></div>
+    <div class="card"><div class="big">−34%</div><p>how far the badge-sum "floor" is below the truth: the error other tools make</p></div>
+    <div class="card"><div class="big">673</div><p>automated tests passing; CI runs Python tests plus frontend lint, type-check, build and i18n on every push</p></div>
+  </div>
+  <h3>How accuracy is proven</h3>
+  <ul class="plain">
+    <li><strong>Synthetic ground truth</strong> (<code>metrics/synthetic.py</code>): generate markets with known true sales (sub-categories, price elasticity −0.9, rating and age effects, normal or heavy-tailed noise, missing data), apply the real badge censoring, and check whether the model recovers the truth. Calibration markets and validation markets are different seeds.</li>
+    <li><strong>Hold-out AUC on real data:</strong> hide badges and predict them. Per market pass/watch/fail (target 0.70).</li>
+    <li><strong>Human labels:</strong> the precision and recall of relevance and grouping come only from people labelling samples.</li>
+    <li><strong>Launch calibration:</strong> launched projects' actual sales against their predicted p10–p90.</li>
+    <li><strong>Invariant tests:</strong> totals add up at every level; shares sum to 1; every estimate lies inside its interval.</li>
+    <li><strong>Acceptance test</strong> (<code>test_acceptance_v3.py</code>): a full bilingual user journey: two uploads, size, segments, competitors, launch, shopping, graph path, analyst EN and ZH, alerts, project, opportunity board, accuracy.</li>
+  </ul>
+  <h3>Traceability of AI</h3>
+  <p>Every AI call is stored in <code>ai_traces</code>: model, prompt version, input hash, output, status and timestamp, as PRINCIPLES.md principle 6 requires. Analyst replies containing any number not in the computed facts are <strong>rejected</strong>, and the computed answer is shown instead.</p>
+</section>
+
+<section id="findings">
+  <h2>Real-data findings (the three provided exports)</h2>
+  <div class="tbl"><table>
+    <tr><th>Market</th><th>Estimated revenue / month</th><th>Grade</th><th>Notes</th></tr>
+    <tr><td>dental_models</td><td class="nums">$175.8k (95%: $130.6k–$245.2k); floor $64.9k</td><td>C</td><td class="w">293 products, 47 segments, 376 listings; HHI about 506 (competitive); one significant gap: <strong>"teaching"</strong> (lift about 3×); hold-out AUC 0.72.</td></tr>
+    <tr><td>denture_base</td><td class="nums">$114.1k ($100.3k–$131.7k)</td><td>C</td><td class="w">56 products, 15 segments; HHI about 1,894; weak hold-out AUC (0.46), so read its intervals, not its point estimates.</td></tr>
+    <tr><td>implants</td><td class="nums">$12.7k ($2.3k–$29.7k)</td><td>D</td><td class="w">Only a small in-scope slice: about 96% of the export's revenue is water flossers, which the category definition excludes.</td></tr>
+  </table></div>
+  <p>The pilot category in PRINCIPLES.md is 义齿基托 (denture base) on Amazon US. The data files were used for <strong>learning and reference only</strong>. Nothing in the code is tuned to them.</p>
+</section>
+
+<section id="limits">
+  <h2>Limitations and roadmap (say these confidently)</h2>
+  <ul class="plain">
+    <li><strong>Growth needs time:</strong> at least 3 dated monthly exports for a trend, 24 for seasonality. The current data are single snapshots, so growth pages say "needs snapshots" rather than inventing a trend.</li>
+    <li><strong>No review text</strong> in the current exports. Customer pain uses the rating-based quality gap until reviews are uploaded.</li>
+    <li><strong>No supplier list</strong> has been supplied yet, so supplier matching is empty.</li>
+    <li><strong>Price effect is associational</strong>, not causal: listings at different prices differ in other ways too.</li>
+    <li><strong>Human labelling</strong> (about 50 products per market) is still needed to report real precision and recall.</li>
+    <li><strong>Operations gaps:</strong> no billing provider; one organisation per user; the Amazon SP-API connector is not wired.</li>
+    <li><strong>Next steps:</strong> monthly exports, labelling, a backtest on history, a 4-week pilot with 3–5 users, then an exit report.</li>
+  </ul>
+  <div class="say"><small>Say this</small>The system tells you when it doesn't know. With one snapshot it refuses to claim growth; with weak evidence it grades the market D and widens the interval. That honesty is a feature.</div>
+</section>
+
+<section id="history">
+  <h2>How it was built (phases)</h2>
+  <div class="tbl"><table>
+    <tr><th>Phase</th><th>What was delivered</th></tr>
+    <tr><td>v1 engine</td><td class="w">Universal market intelligence engine: cleaning, relevance, product matching, classification (<code>src/dmie</code>).</td></tr>
+    <tr><td>Platform v2</td><td class="w">FastAPI, lake, graph, vectors, Next.js 3D command center, 10⁶-row scale (Polars), auth, XGBoost relevance.</td></tr>
+    <tr><td>Master Prompt 2</td><td class="w">Enterprise layer: confidence framework, product hierarchy, trends, competitors, analyst, alerts, roles.</td></tr>
+    <tr><td>Master Prompt 3</td><td class="w">Operations: audit log, 7 roles, change alerts, daily summaries, scheduler, product pipeline with approvals; productisation (tenancy, plans, job queue, Docker, backup).</td></tr>
+    <tr><td>Master Prompt 4</td><td class="w">Pilot tooling: data inventory, labelling and accuracy metrics, stable product IDs, "This looks wrong" feedback.</td></tr>
+    <tr><td>Phases 5–8</td><td class="w">The statistical rebuild (metrics v3), decision pages rebuilt on it, Gemini analyst with number guard, full Chinese/English, significance-tested alerts, accuracy dashboard.</td></tr>
+    <tr><td>Post-Phase 8</td><td class="w">Growth and forecast, sub-category detail, product position, Opportunity Board, exact reconciliation of totals, mobile menu, i18n guard. Merged as PR #7.</td></tr>
+  </table></div>
+  <p>Roles: admin, manager, product_manager (scoped to their own categories), supplier_manager, analyst, viewer, customer.</p>
+</section>
+
+<section id="glossary">
+  <h2>Glossary</h2>
+  <div class="tbl"><table>
+    <tr><th>Term</th><th>Meaning</th></tr>
+    <tr><td>ASIN / listing</td><td class="w">One Amazon product page. Not the same as a product.</td></tr>
+    <tr><td>Product</td><td class="w">An underlying model or configuration; can have many listings. The best-selling listing is the one with the highest valid monthly sales.</td></tr>
+    <tr><td>Segment / sub-category</td><td class="w">A group of similar products discovered from titles and specs, under a marketplace family.</td></tr>
+    <tr><td>Badge / ladder</td><td class="w">Amazon's "N+ bought" ranges: 50, 100, 200 … 1K, 2K …</td></tr>
+    <tr><td>Interval-censored</td><td class="w">We know a value lies in a range, not the value itself.</td></tr>
+    <tr><td>95% interval</td><td class="w">The range that contains the true value 95% of the time (validated).</td></tr>
+    <tr><td>Floor / ceiling</td><td class="w">Sum of lower / upper badge bounds. The floor is certain.</td></tr>
+    <tr><td>Bootstrap</td><td class="w">Refit on resampled data many times to measure uncertainty.</td></tr>
+    <tr><td>Monte Carlo simulation</td><td class="w">400 random joint draws of all listings to get intervals for totals and shares.</td></tr>
+    <tr><td>HHI</td><td class="w">Herfindahl–Hirschman Index of concentration, 0–10,000.</td></tr>
+    <tr><td>P(#1)</td><td class="w">Probability a brand is the largest, across simulations.</td></tr>
+    <tr><td>Entrant</td><td class="w">A listing launched in the last 365 days.</td></tr>
+    <tr><td>Lift</td><td class="w">Demand per listing with a feature ÷ without it.</td></tr>
+    <tr><td>Benjamini–Hochberg (BH), q-value</td><td class="w">Correction for testing many things at once; q is the false-discovery-adjusted p-value.</td></tr>
+    <tr><td>AUC</td><td class="w">How well the model ranks badged above unbadged listings in hold-out data (0.5 = chance, 1 = perfect).</td></tr>
+    <tr><td>Empirical Bayes shrinkage</td><td class="w">Pull a small group's rate toward the overall rate in proportion to how little data it has.</td></tr>
+    <tr><td>Bayesian rating</td><td class="w">A rating shrunk toward the market mean when a product has few reviews.</td></tr>
+    <tr><td>Pareto front</td><td class="w">The options that nothing else beats on every criterion.</td></tr>
+    <tr><td>Posterior predictive</td><td class="w">The distribution of outcomes for a new item, including model uncertainty.</td></tr>
+    <tr><td>Common random numbers</td><td class="w">Using the same random draws for each scenario so comparisons are fair.</td></tr>
+    <tr><td>Evidence grade</td><td class="w">A–D rating of how much the data can say (listings, badge share, AUC).</td></tr>
+  </table></div>
+</section>
+
+<section id="qa">
+  <h2>Question drill</h2>
+  <p>Say your answer out loud first, then open the card to check.</p>
+  <div class="tools"><button type="button" id="openAll">Open all answers</button><button type="button" id="closeAll">Close all</button></div>
+
+
+  <div class="qcat">Basics (expect these first)</div>
+  <details><summary>What is the tech stack?</summary><div class="a"><p><strong>Backend:</strong> Python with FastAPI. <strong>Data:</strong> Parquet files queried with DuckDB, plus SQLite by default or PostgreSQL through SQLAlchemy. <strong>Graph:</strong> NetworkX or Neo4j. <strong>Vectors:</strong> Qdrant. <strong>Ingestion:</strong> Polars. <strong>Statistics:</strong> NumPy, SciPy, scikit-learn, XGBoost. <strong>Frontend:</strong> Next.js 16, React 19, TypeScript, Tailwind, ECharts, three.js. <strong>AI:</strong> optional Google Gemini. <strong>Deployment:</strong> Docker.</p></div></details>
+  <details><summary>How is the database connected?</summary><div class="a"><p>Through SQLAlchemy. <code>settings.business_url</code> is <code>DIP_POSTGRES_URL</code> if set, otherwise <code>sqlite:///data/platform/business.db</code>. <code>create_engine</code> is cached per URL; on first connect it creates tables, runs an additive migration and seeds permissions. Code opens <code>with business.session() as s</code>. Analytical tables are Parquet files read by DuckDB with <code>read_parquet</code>, so there is no database server.</p></div></details>
+  <details><summary>How does the frontend talk to the backend?</summary><div class="a"><p>The pages call <code>fetch('/api/v2/…')</code>. Next.js rewrites that path to FastAPI on port 8000 (<code>next.config.ts</code>, <code>DIP_API_URL</code>), so everything is same-origin with no CORS. Responses are JSON, and a bearer token is added when auth is on.</p></div></details>
+  <details><summary>Why FastAPI? Why Next.js?</summary><div class="a"><p><strong>FastAPI:</strong> Python is where the statistics live; it gives typed request validation (Pydantic), automatic API docs at <code>/docs</code> and good performance. <strong>Next.js with React:</strong> file-based routing (one folder per page), server rewrites to proxy the API, and the React ecosystem for 3D (react-three-fiber) and charts.</p></div></details>
+  <details><summary>Why DuckDB and Parquet instead of putting everything in Postgres?</summary><div class="a"><p>Market data is analytical: wide, columnar and read-heavy. Parquet is compressed and columnar, and DuckDB runs fast SQL straight on the files with no server. Operational records (users, projects, alerts) need transactions, so they go in SQL. This is a standard lakehouse split.</p></div></details>
+  <details><summary>Does it need the internet?</summary><div class="a"><p>No. Everything runs offline on a laptop, including embeddings, which are hash-based rather than an external model. Only the optional Gemini phrasing and the optional live connectors need the network.</p></div></details>
+  <details><summary>What data does it take in?</summary><div class="a"><p>SellerSprite exports in Excel, CSV or JSON. Columns are detected automatically (Chinese headers too). Optional extras: a snapshot date, a reviews file (id, text, rating), and a supplier list (CSV template in <code>data/templates</code>).</p></div></details>
+  <details><summary>How many pages and how many API endpoints?</summary><div class="a"><p>About 25 pages in the sidebar plus product and market detail pages. The API has about 120 endpoints under <code>/api/v2</code>, across <code>metrics, catalog, intelligence, enterprise, workflow, operations, people, pilot, orgs, auth</code>. The full list is at <code>localhost:8000/docs</code>.</p></div></details>
+  <details><summary>Where is the data stored on disk?</summary><div class="a"><p><code>data/raw</code> holds the untouched inputs. <code>data/lake/curated/&lt;table&gt;/market=&lt;name&gt;/data.parquet</code> holds the market tables. <code>data/platform/</code> holds <code>business.db</code>, <code>graph.duckdb</code>, the vector store and the accuracy run results. Generated data is not committed to git.</p></div></details>
+  <details><summary>How is the project organised in git?</summary><div class="a"><p>The work was done on feature branches, one pull request per phase (PR #2 to #7), each merged to <code>main</code> after green CI. GitHub Actions runs the Python tests and the frontend lint, type-check, build and i18n check.</p></div></details>
+
+  <div class="qcat">Infrastructure &amp; engineering (intermediate)</div>
+  <details><summary>How are uploads processed without blocking the UI?</summary><div class="a"><p>The upload returns a <code>job_id</code> immediately. Processing runs in a background thread, or with <code>DIP_JOB_MODE=queue</code> in a separate worker process that reads <code>job_queue</code>. Each stage writes its status, seconds and peak memory to <code>jobs</code>, and the UI polls <code>/jobs/{id}</code>.</p></div></details>
+  <details><summary>How do you avoid stale or slow reads?</summary><div class="a"><p><code>@response_cache</code> keys each read by its arguments, the data version and the user's market scope. Processing a market bumps the version, so caches invalidate automatically. The Opportunity Board caches per market run (<code>run_id:updated_at</code>).</p></div></details>
+  <details><summary>How is security handled?</summary><div class="a"><p>Bearer tokens; only the SHA-256 hash is stored; 90-day expiry; revocation. There is role-based access control (7 roles), market-scoped product managers, and multi-tenant organisations with plan limits. An audit log records every state change. Secrets live in <code>.env</code>, which is never committed.</p></div></details>
+  <details><summary>How do schema changes work without losing data?</summary><div class="a"><p><code>business.migrate()</code> compares the models with the live tables and <code>ALTER TABLE … ADD COLUMN</code>s any missing nullable column. It never drops anything. The lake is rewritten per market on each run.</p></div></details>
+  <details><summary>How does it scale to a million rows?</summary><div class="a"><p>Polars streaming ingestion and vectorised NumPy stages; records are joined by id without copying. The bootstrap is capped at 20,000 rows and cross-validation at 5,000 (fixed-seed subsets); simulations use <code>bincount</code> group sums. The galaxy draws the top 3,000 products by revenue and states the share drawn.</p></div></details>
+  <details><summary>How are backups done?</summary><div class="a"><p><code>python scripts/dmis.py backup</code> writes an archive of the business DB, lake and settings; <code>restore ARCHIVE</code> restores it. In embedded mode the archive holds everything in the platform and lake folders (SQLite, DuckDB, embedded graph, local Qdrant). With servers, PostgreSQL is dumped, while Neo4j and Qdrant servers are rebuilt by re-processing or backed up with their own tools.</p></div></details>
+  <details><summary>How are the similarity embeddings made, and why not a big AI model?</summary><div class="a"><p>A hashing vectoriser over words (1–2-grams) and characters (3–5-grams), randomly projected to 256 dimensions and normalised. It is deterministic, offline, instant and good at near-duplicate product titles. The design notes that swapping in a sentence-embedding model only means replacing <code>embed()</code>.</p></div></details>
+  <details><summary>How is the galaxy layout computed?</summary><div class="a"><p>Segment centres are spread around a sphere. Within a segment, products are placed by the top 3 SVD components of their title vectors, so similar titles sit close together. The coordinates are stored as <code>gx, gy, gz</code> during processing.</p></div></details>
+  <details><summary>How is translation done?</summary><div class="a"><p>Every UI string is a key in <code>messages/en.ts</code> and <code>zh.ts</code>, read through <code>useI18n().t(key, vars)</code>. The language is stored in localStorage (<code>dmis_lang</code>). Backend sentences that are generated (formula bases) are translated by pattern rules in <code>basis-zh.ts</code>, and anything unmatched is shown in English rather than guessed. Segment descriptions are generated in both languages. <code>check-i18n.mjs</code> fails CI on missing keys or hard-coded English.</p></div></details>
+  <div class="qcat">Concept</div>
+  <details><summary>What problem does DMIS solve in one sentence?</summary><div class="a"><p>It tells a product team, with measured confidence, how big an Amazon category really is, who controls it, where unmet demand is, and which product to launch, from exports that only show vague sales badges.</p></div></details>
+  <details><summary>Why can't you just add up the sales numbers?</summary><div class="a"><p>They are badges ("200+"), not numbers. A badge is a range, and unbadged listings still sell (fewer than 50). Summing the floors undercounts by about 34%. We model the true value inside each range.</p></div></details>
+  <details><summary>What's the difference between a listing and a product?</summary><div class="a"><p>A listing is one ASIN. A product is the underlying item and may have several listings (colours, packs, sellers). DMIS resolves listings into products and never counts listings as product types.</p></div></details>
+  <details><summary>Is this tool only for dental products?</summary><div class="a"><p>No. Category rules live in <code>config/categories.yaml</code> and every statistical setting in <code>metrics.yaml</code>. The dental exports were used for learning and reference only. Badge detection, segmentation and all maths run on any category.</p></div></details>
+  <details><summary>Where is AI used, and where is it not?</summary><div class="a"><p>Used for semantic judgement: relevance, classification, and optional phrasing of analyst answers (Gemini). Never used for numbers: all aggregation is Python/DuckDB. The Gemini reply is rejected if it contains any number not in the computed facts, and every AI call is logged with model, prompt version, input, output and status.</p></div></details>
+
+  <div class="qcat">Statistics</div>
+  <details><summary>How is market size calculated?</summary><div class="a"><p>An interval-censored log-linear demand model (price, rating, age, sub-category; normal or t errors chosen by AIC) is fitted to all listings. Each listing gets its expected sales given its badge range. The market estimate is the sum of those. 400 joint simulations with bootstrap parameters give the 95% interval, widened by the calibrated factor 1.3.</p></div></details>
+  <details><summary>How do you know the 95% interval is really 95%?</summary><div class="a"><p>We generated synthetic markets with known true sales, applied the real badge censoring, and counted how often the interval contained the truth. The widening factor 1.3 was calibrated on one set of markets and verified on different ones. The latest run: 100% market coverage, 1.7% median error.</p></div></details>
+  <details><summary>Why is there a floor and an estimate?</summary><div class="a"><p>The floor is certain (every listing at the bottom of its badge), but it is biased low. The estimate is our best value with an interval. We show both so nobody confuses the two.</p></div></details>
+  <details><summary>How is the opportunity index built, and why geometric mean?</summary><div class="a"><p>Six components (demand 25%, entry 25%, margin 20%, competition 15%, quality gap 10%, saturation 5%), each on an absolute 0–1 scale. A weighted geometric mean means one fatal weakness pulls the score down instead of being averaged away. Missing components are left out and coverage is shown.</p></div></details>
+  <details><summary>What does "significant" mean in this tool?</summary><div class="a"><p>A formal test (bootstrap intervals for gaps, a z-test on log estimates for changes, exact binomial for launch momentum, a t-test for trend) with Benjamini–Hochberg false-discovery control when many things are tested at once. Non-significant results are shown as "within noise" and never raised as alerts.</p></div></details>
+  <details><summary>What is HHI and what does 2,432 mean?</summary><div class="a"><p>The sum of squared brand shares (in %). Above 2,500 is highly concentrated. 2,432 is moderately concentrated, equivalent to about 4.1 equal-sized competitors (10,000 ÷ HHI).</p></div></details>
+  <details><summary>What is P(#1)?</summary><div class="a"><p>The share of the 400 simulations in which a brand has the highest revenue. It tells you whether a "leader" is really ahead or just ahead by noise. At 50% or more we call it a leader.</p></div></details>
+  <details><summary>How does the recommended product get chosen?</summary><div class="a"><p>In each segment with at least 8 listings, every candidate feature's demand lift is estimated with a bootstrap interval. The p-values are BH-corrected at 10% FDR, and significant, under-supplied features are gaps. Up to 3 co-occurring gaps are combined with the best price band. If no gap is significant, it says so and recommends the best price band.</p></div></details>
+  <details><summary>How does the forecast work, and why does it say "needs snapshots"?</summary><div class="a"><p>A random-effects log-linear trend across monthly snapshots, each weighted by its own interval plus estimated month-to-month variation. It needs at least 3 dated snapshots; we currently have one per market, so it refuses to invent a trend. Forecasts beyond the observed history are flagged ⚠, and seasonality needs 24 months.</p></div></details>
+  <details><summary>Is the price effect causal? Can I set prices with it?</summary><div class="a"><p>No, it is a cross-sectional association (cheaper listings may differ in other ways). The simulator says so. Use it to compare scenarios, and confirm with real tests.</p></div></details>
+  <details><summary>What is the evidence grade?</summary><div class="a"><p>A–D, based on the number of listings, the share with a badge, and the hold-out AUC. A needs ≥ 50 listings, ≥ 25% badged and AUC ≥ 0.75. At C or D, trust the intervals, not the point estimates.</p></div></details>
+  <details><summary>Do the numbers add up across pages?</summary><div class="a"><p>Exactly. Listings sum to products, products to brands and segments, segments to the market. Each total is the sum of its listings' expected sales, and simulation draws are rescaled to it. An automated invariant test enforces this. Segment and brand shares sum to exactly 1.</p></div></details>
+
+
+  <div class="qcat">Deep statistics (expert follow-ups)</div>
+  <details><summary>Write the likelihood of the demand model.</summary><div class="a"><p>For listing i with log-mean μᵢ = xᵢβ and scale σ: an exact observation contributes the density f((log yᵢ − μᵢ)/σ)/σ. A badge interval [L, U) contributes F((log U − μᵢ)/σ) − F((log L − μᵢ)/σ). No badge contributes F((log 50 − μᵢ)/σ). F is the normal or Student-t CDF. We maximise the sum of the logs, minus a ridge penalty on the standardised coefficients.</p></div></details>
+  <details><summary>How do you choose between normal and heavy-tailed errors?</summary><div class="a"><p>We fit normal, t10, t5 and t3 and pick by AIC. With fewer than 30 badged listings only normal is allowed, because the tail shape isn't identifiable. Each bootstrap refit re-selects the family, so model uncertainty is carried into the intervals.</p></div></details>
+  <details><summary>What is the bias correction?</summary><div class="a"><p>Censored MLE is biased in small samples. We estimate the bias with the parametric bootstrap (mean of refits minus the original fit) and subtract it: β̂_bc = 2β̂ − mean(β̂*).</p></div></details>
+  <details><summary>Why parametric rather than case bootstrap?</summary><div class="a"><p>Both were tested on synthetic markets; the parametric bootstrap gave calibrated coverage. That is recorded as <code>bootstrap_method: parametric</code> in the config.</p></div></details>
+  <details><summary>How is a listing's conditional mean computed?</summary><div class="a"><p>E[Y | L ≤ Y &lt; U]. For normal errors in log space there is a closed form: exp(μ + σ²/2)·[Φ(b − σ) − Φ(a − σ)] / [Φ(b) − Φ(a)], with a and b the standardised bounds. For t errors we use 64-node midpoint quadrature over conditional quantiles. The result is clipped into [L, U), and exact observations keep their value.</p></div></details>
+  <details><summary>Why multiply the interval width by 1.3? Isn't that a fudge?</summary><div class="a"><p>It is a calibration, not a fudge. Raw simulation intervals under-covered on synthetic truth (misspecification and finite-sample effects). The factor needed for 95% coverage was 1.29 on normal markets and 1.30 on heavy-tailed ones, calibrated on 80 markets and verified on 80 different ones. The method is documented in METHODOLOGY §1.4–1.5.</p></div></details>
+  <details><summary>Point estimate: simulation mean or sum of listing means? Why?</summary><div class="a"><p>The sum of the listings' conditional means. It is deterministic and additive, so every level of the hierarchy reconciles. On 24 synthetic markets it was as accurate as the draw mean (2.0% vs 1.9% median error, both unbiased). Each group's simulation draws are rescaled to that sum, keeping intervals, shares and ranks consistent. Without this, clipping small groups at 0 had inflated product totals (for example $179.5k of products under a $175.8k market).</p></div></details>
+  <details><summary>How do shares sum to exactly 1 with rescaled draws?</summary><div class="a"><p>Shares are computed per simulation as a member's draw divided by the sum of all members' draws in that simulation (segments of the market, brands of a segment), then averaged. This is self-normalising, so they sum to 1 in every draw.</p></div></details>
+  <details><summary>Explain Benjamini–Hochberg and why FDR instead of Bonferroni.</summary><div class="a"><p>Sort the m p-values; q₍ᵢ₎ = min over j ≥ i of p₍ⱼ₎·m/j. Rejecting all q ≤ α controls the expected share of false discoveries at α. Bonferroni controls the chance of any false positive, which is far too strict when we test hundreds of features and would hide real gaps.</p></div></details>
+  <details><summary>How is the lift interval computed for a demand gap?</summary><div class="a"><p>400 bootstrap resamples of the segment's listings. In each, lift = mean units with the feature ÷ mean units without it. The percentile interval and a bootstrap p-value (share of resamples with lift ≤ 1) follow. Features need at least 5 listings with and 5 without.</p></div></details>
+  <details><summary>How is entrant success shrunk?</summary><div class="a"><p>Empirical Bayes: segment rate = (successes + k·market rate) / (entrants + k), with k = 5 pseudo-entrants. Segments with many entrants keep their own rate; small ones move toward the market rate.</p></div></details>
+  <details><summary>Describe the forecast model precisely.</summary><div class="a"><p>log yᵢ = a + b·tᵢ + uᵢ + eᵢ, where eᵢ ~ N(0, sᵢ²) comes from each snapshot's interval (sᵢ = (log hi − log lo)/(2·1.96), floored at 0.01) and uᵢ ~ N(0, τ²). τ² is estimated by method of moments (DerSimonian–Laird generalised to regression, floored at 0). a and b are fitted by weighted least squares with weights 1/(sᵢ² + τ²). Growth = e^b − 1 with a t interval on n − 2 degrees of freedom. The h-month forecast variance is var(a + b·t) + τ². Time is measured as days / 30.4375.</p></div></details>
+  <details><summary>What is the significance test for a change between snapshots?</summary><div class="a"><p>On the log scale: z = (log after − log before)/√(se₁² + se₂²), with each se from its 95% interval, and a two-sided normal p-value. All tests in one run are BH-adjusted and q ≤ 0.05 is significant. Log scale is used because revenues and shares are positive with asymmetric intervals.</p></div></details>
+  <details><summary>How does the launch simulator produce a distribution for a product that doesn't exist yet?</summary><div class="a"><p>It uses the stored model card (coefficients, bootstrap sets, error family, covariate standardisation). The idea is placed in the nearest segment by text similarity, and a segment offset (the segment's mean residual, shrunk) is added. Covariates: the given price, rating (default: the segment median, stated), and age. Then 400 draws come from the posterior predictive (a parameter set, then noise from the error family), truncated at the top-rung cap so heavy tails don't give infinite means. Profit = units × unit margin − fixed costs.</p></div></details>
+  <details><summary>Why "common random numbers" in scenario comparison?</summary><div class="a"><p>The same random draws are used for every scenario, so the difference between two prices reflects the price, not sampling noise. This is a variance-reduction technique, and it also makes the price curve smooth (<code>shared_noise</code>).</p></div></details>
+  <details><summary>How is the evidence grade's AUC computed?</summary><div class="a"><p>5-fold cross-validation on real data: fit on 4 folds with their badges, predict the held-out listings' probability of being above the first rung, and compute ROC-AUC against which ones actually carried a badge.</p></div></details>
+  <details><summary>How is the Bayesian rating computed?</summary><div class="a"><p>(v·R + C·m)/(v + C), where R is the product's rating, v its review count and m the market mean. The prior strength C is data-driven: the median review count of rated listings. With no review counts in the source, each listing counts once, and that basis is stated.</p></div></details>
+  <details><summary>How does the Pareto ranking work?</summary><div class="a"><p>Product A dominates B if A is at least as good on every criterion (match, Bayesian rating, proven demand, price) and strictly better on one. Fronts are peeled repeatedly: front 1 is undominated, front 2 is undominated once front 1 is removed, and so on. Within a front, products are ordered by the buyer's weighted utility. A dominated product is never ranked above its dominator, and a test checks this.</p></div></details>
+  <details><summary>How are product percentiles computed?</summary><div class="a"><p>Mid-rank: (number of peers strictly below + 0.5 × number tied) ÷ number of peers, per metric, within the product's segment.</p></div></details>
+  <details><summary>How is the price-band demand interval computed?</summary><div class="a"><p>Price bands are within-segment price quantiles (4 bands). There are 2,000 bootstrap resamples over listings with a fixed seed. The interval covers the band's mean units per listing and its share of segment revenue, so it measures sampling variation. Each listing's own model interval is separate.</p></div></details>
+
+  <div class="qcat">Challenge questions (skeptics)</div>
+  <details><summary>"Your estimate is just a model. Why trust it over the real badge numbers?"</summary><div class="a"><p>The badge sum is also a number, and it is provably about 34% too low. We don't replace the badges: every estimate stays inside its listing's badge range, and we still show the certain floor. We measured the model on markets where the truth is known and reported the error and coverage.</p></div></details>
+  <details><summary>"Synthetic data isn't real data. How do you know it works on real markets?"</summary><div class="a"><p>Synthetic truth is the only way to measure bias exactly, and it uses the real badge censoring. For real data we add per-market hold-out AUC (badges hidden, then predicted), human labelling for precision and recall, and a launch-calibration check once projects launch. The evidence grade drops when real-data validation is weak (denture_base AUC 0.46 is shown as a fail).</p></div></details>
+  <details><summary>"The interval is huge. Isn't that useless?"</summary><div class="a"><p>A wide interval is information: the data can't pin the number down. It tells you to collect more (monthly snapshots, exact sales) before betting. A tool that shows one confident number in that situation is hiding the risk.</p></div></details>
+  <details><summary>"Why are opportunity weights 25/25/20/15/10/5? Isn't that arbitrary?"</summary><div class="a"><p>They are explicit, documented and configurable in <code>metrics.yaml</code>, not hidden in code. Each component is on an absolute, interpretable scale, and the page shows every component so you can disagree with one piece. The alternative, an opaque learned score, would need launch-outcome labels we don't have yet. Launch calibration will let us revisit the weights.</p></div></details>
+  <details><summary>"Couldn't the AI just make up numbers?"</summary><div class="a"><p>No. The analyst's answer is a list of facts computed by code, each with a verify link. The optional Gemini step only rephrases them. A number guard extracts every number in the reply (handling %, k, M and 万) and rejects the reply if any is not in the facts within tolerance. Every call is traced.</p></div></details>
+  <details><summary>"What if the category boundary is wrong, e.g. water flossers in implants?"</summary><div class="a"><p>Relevance rules are in <code>categories.yaml</code>. On the Market page you can confirm or override each sub-category's inclusion, and it applies on the next run. Excluded listings are never deleted; they keep a reason. We found exactly this: about 96% of the "implants" export is water flossers, so only $12.7k/month is in scope, grade D.</p></div></details>
+  <details><summary>"What's the single biggest weakness?"</summary><div class="a"><p>Time-series depth. With one snapshot per market we can size, segment and compare, but we can't prove growth. The system says so instead of guessing. Three or more monthly exports unlock the growth and forecast features.</p></div></details>
+  <details><summary>"How long does processing take?"</summary><div class="a"><p>For the provided exports (a few hundred listings each), roughly a minute per market, including the bootstrap and 400 simulations; the exact time depends on the machine. Stage timings are shown live on Data Operations, and the pipeline is built to scale to 10⁶ rows.</p></div></details>
+  <div class="qcat">Features</div>
+  <details><summary>How does someone decide what to sell using DMIS?</summary><div class="a"><p>Open the Opportunity Board: every market's top sub-categories, each with a concept (features plus price), simulated sales, the chance of reaching $5k/month, growth, leader and entry evidence. Expand a row and click "Open in Launch Simulator" to add a unit cost and see profit.</p></div></details>
+  <details><summary>What does the Launch Simulator output?</summary><div class="a"><p>Units, revenue and profit as distributions (median, p10–p90), P(profit &gt; 0), P(hitting the target), break-even, payback, a price curve, gaps covered, risks, and what real entrants sell. It shows no profit without a real unit cost.</p></div></details>
+  <details><summary>How do alerts avoid being noisy?</summary><div class="a"><p>Each change between snapshots is tested against both snapshots' intervals, with BH correction across the run. Only significant ones (q ≤ 0.05) reach owners; the rest stay as "info" in the log.</p></div></details>
+  <details><summary>Does it support Chinese?</summary><div class="a"><p>Fully. Every page, chart label and analyst answer (the analyst understands Chinese questions). About 1,250 translation keys, with a CI check that fails on missing keys or hard-coded English.</p></div></details>
+  <details><summary>Who can see what?</summary><div class="a"><p>Seven roles: admin, manager, product_manager, supplier_manager, analyst, viewer, customer. Product managers are scoped to their own categories. There are API tokens (90-day expiry), multi-organisation tenancy with plans, and an audit log of every state change.</p></div></details>
+  <details><summary>What happens to excluded data?</summary><div class="a"><p>Nothing is deleted. Every excluded listing keeps a reason and is listed on Data Operations, where relevance decisions can be corrected.</p></div></details>
+
+  <div class="qcat">Tech &amp; ops</div>
+  <details><summary>What's the tech stack?</summary><div class="a"><p>Python FastAPI backend; DuckDB over Parquet lake; SQLite or PostgreSQL; NetworkX or Neo4j graph; Qdrant or embedded vectors; Polars ingestion; SciPy statistics; Next.js 16 / React 19 with ECharts and three.js; optional Gemini; Docker.</p></div></details>
+  <details><summary>Can it handle big data?</summary><div class="a"><p>Yes. Polars streaming ingestion and scaled stages handle 10⁶+ rows. Bootstrap is capped at 20,000 rows, cross-validation at 5,000, and the galaxy draws the top 3,000 products and states the share drawn.</p></div></details>
+  <details><summary>How is it tested?</summary><div class="a"><p>673 automated tests, including synthetic ground-truth checks, invariant tests, API contracts and a bilingual end-to-end acceptance journey. GitHub CI runs the Python tests and the frontend lint, type-check, build and i18n check on every push. PR #7 merged green.</p></div></details>
+  <details><summary>How do I run it?</summary><div class="a"><p><code>./run_platform.sh</code> (or <code>run_platform.bat</code> on Windows). It installs dependencies, builds data from <code>data/raw</code> on first run, starts the API on port 8000 and the UI on port 3000.</p></div></details>
+  <details><summary>What would you do next?</summary><div class="a"><p>Collect 3–6 monthly dated exports per category (for growth), review text (for pain points), and the supplier list. Run human labelling for precision and recall, backtest on history, then a 4-week pilot with 3–5 users.</p></div></details>
+</section>
+
+<section id="cmds">
+  <h2>Commands to know</h2>
+<pre># get the latest code
+git remote set-url origin https://github.com/SylusZephyr/DMIS-.git
+git pull origin main
+
+# one-click run (macOS/Linux; Windows: run_platform.bat)
+./run_platform.sh          # UI → http://localhost:3000   API docs → http://localhost:8000/docs
+
+# CLI (scripts/dmis.py)
+python scripts/dmis.py bootstrap                      # rebuild all markets from data/raw
+python scripts/dmis.py process FILE --market NAME     # process one export
+python scripts/dmis.py serve --port 8000              # API only
+python scripts/dmis.py backup / restore ARCHIVE       # backups
+python scripts/dmis.py create-user EMAIL NAME         # users
+
+# checks
+python -m pytest -q
+cd frontend &amp;&amp; npm run lint &amp;&amp; npx tsc --noEmit &amp;&amp; npm run check:i18n</pre>
+  <div class="tip"><b>Before you present:</b> pull, run <code>bootstrap</code> once (it builds the new tables the Opportunity Board and growth features read), start the app, and open every page from the run-sheet once so nothing loads for the first time on stage.</div>
+</section>
+</main>
+</div>
+
+<script>
+document.getElementById('openAll').addEventListener('click',()=>document.querySelectorAll('#qa details').forEach(d=>d.open=true));
+document.getElementById('closeAll').addEventListener('click',()=>document.querySelectorAll('#qa details').forEach(d=>d.open=false));
+</script>

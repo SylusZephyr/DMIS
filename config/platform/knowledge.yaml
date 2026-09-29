@@ -1,0 +1,367 @@
+# Product knowledge layer (spec: AI-Powered Global Dental Product Intelligence, sections 11-14, 19, 67, 89-90, 101).
+# Every threshold, weight, term list and attribute schema used by src/dip/knowledge lives here
+# (PRINCIPLES.md principle 9). Category-specific attribute schemas are keyed by the category slug used in
+# config/categories.yaml; a market without its own schema uses `generic`.
+
+# ---------------------------------------------------------------- Dental Confidence (0-100), spec 11 + 13.1
+dental_confidence:
+  # spec 11: 0.30 text + 0.25 application + 0.20 image + 0.15 specification + 0.10 industry evidence.
+  # A component with no evidence at all is left out and the others are re-weighted, so a missing signal
+  # is never counted as "non-dental" (spec 11: low online evidence must not mean non-dental).
+  weights:
+    text: 0.30
+    application: 0.25
+    image: 0.20
+    specification: 0.15
+    industry: 0.10
+  # the score is capped when few components carry evidence: one weak signal can't look certain
+  cap_by_components: {1: 80, 2: 90}
+  bands:              # lower bound (inclusive) -> label, checked top-down
+    - [85, strong]
+    - [70, probable]
+    - [45, review]
+    - [20, probably_non_dental]
+    - [0, non_dental]
+  # text evidence: share of the listing's words that are dental terms vs non-dental terms
+  text:
+    title_weight: 1.0
+    description_weight: 0.5
+    category_weight: 1.5     # the marketplace sub-category name is strong evidence
+    saturation: 3            # this many independent dental terms => full text score
+  # industry evidence: the listing's brand appears in the offline/industry registries (manufacturers,
+  # exhibitors, dental distributors) -- data/reference/*.csv when present
+  industry_registry_glob: data/reference/dental_brands*.csv
+
+# Dental terms (spec 89): seed vocabulary; evidence can extend it through reviewed labels.
+dental_terms:
+  - dental
+  - dentist
+  - dentistry
+  - denture
+  - dentures
+  - tooth
+  - teeth
+  - orthodontic
+  - orthodontics
+  - braces
+  - implant
+  - implants
+  - prosthetic
+  - prosthodontic
+  - crown
+  - bridge
+  - veneer
+  - typodont
+  - molar
+  - incisor
+  - gingival
+  - periodontal
+  - endodontic
+  - root canal
+  - handpiece
+  - micromotor
+  - bur
+  - burs
+  - impression tray
+  - alginate
+  - gypsum
+  - articulator
+  - reline
+  - acrylic resin
+  - zirconia
+  - composite
+  - amalgam
+  - scaler
+  - curette
+  - elevator
+  - periotome
+  - forceps
+  - floss
+  - interdental
+  - retainer
+  - aligner
+  - mouthguard
+  - oral
+  - 牙科
+  - 义齿
+  - 牙齿
+  - 种植体
+  - 正畸
+  - 手机
+non_dental_terms:
+  - nail
+  - manicure
+  - pedicure
+  - jewelry
+  - jewellery
+  - woodworking
+  - engraving
+  - rotary tool
+  - dremel
+  - pet
+  - dog
+  - cat
+  - toy car
+  - automotive
+  - aquarium
+  - hair
+  - makeup
+
+# ---------------------------------------------------------------- Dental application ontology, spec 11 + 90
+# Multi-label: a product can serve several applications. Each class is detected from its terms in the
+# title, sub-category and description. `non_dental` and `ambiguous` are decided by the engine, not listed.
+applications:
+  dental_clinic: [chairside, clinic, clinical, patient, operatory, dentist office, prophy, 诊所]
+  dental_laboratory: [laboratory, lab, technician, model trimmer, milling, sintering, 技工, 实验室]
+  dental_manufacturing: [manufacturing, oem, bulk, industrial, production]
+  dental_education: [teaching, training, student, education, educational, demonstration, typodont, practice model, exam, 教学]
+  dental_research: [research, study model, specimen]
+  dental_hygiene: [floss, interdental, toothbrush, tongue cleaner, water flosser, oral irrigator, whitening, mouthwash, 口腔护理]
+  dental_imaging: [x-ray, xray, radiograph, intraoral camera, sensor, scanner, 影像]
+  dental_surgery: [surgical, surgery, extraction, elevator, periotome, forceps, osteotome, suture, scalpel, 外科]
+  orthodontics: [orthodontic, braces, bracket, aligner, retainer, elastic, ligature, 正畸]
+  prosthetics: [denture, crown, bridge, veneer, reline, prosthetic, false teeth, denture base, 义齿, 修复]
+  implantology: [implant, abutment, fixture, overdenture, implant driver, 种植]
+  general_laboratory: [rotary tool, grinder, polishing motor, jewelry, hobby, engraving]
+
+# ---------------------------------------------------------------- Data Confidence (0-100), spec 13.2
+data_confidence:
+  weights:
+    source_quality: 0.20      # per adapter (config/platform/confidence.yaml source reliability)
+    completeness: 0.20        # key fields present
+    freshness: 0.15           # age of the observation vs refresh interval
+    cross_source: 0.10        # agreement between sources (only when >1 source)
+    extraction: 0.15          # confidence of extracted attributes
+    duplicate_risk: 0.10      # 1 - probability the listing is an unresolved duplicate
+    observed_share: 0.10      # observed vs estimated/modeled values
+  key_fields: [title, brand, price, rating, sales, image, launch_date]
+  fresh_days: 30              # fully fresh up to this age; linear decay to 0 at stale_days
+  stale_days: 120
+
+# ---------------------------------------------------------------- Units, spec 67
+units:
+  rpm: {aliases: [rpm, r/min, "r.p.m", krpm, k rpm, 转], canonical: rpm}
+  volt: {aliases: [v, volt, volts, vac, vdc], canonical: V}
+  watt: {aliases: [w, watt, watts], canonical: W}
+  amp: {aliases: [a, amp, amps], canonical: A}
+  torque: {aliases: ["n.cm", ncm, "n·cm", "n.m", nm, "n·m"], canonical: N·cm}
+  length: {aliases: [mm, cm, m, inch, in], canonical: mm}
+  mass: {aliases: [g, gram, grams, kg, lb, lbs, oz], canonical: g}
+  volume: {aliases: [ml, l, "fl oz"], canonical: ml}
+  count: {aliases: [pcs, pc, pieces, pack, count, ct, sets], canonical: count}
+
+# ---------------------------------------------------------------- Attribute schemas, spec 10 + 101
+# kind: number (value + unit), enum (canonical value -> synonyms), token (regex; model/part numbers),
+#       list (multi-valued enum). `commercial: true` marks attributes allowed to define segments.
+attribute_schemas:
+  generic:
+    pack_count: {kind: number, unit: count, commercial: true}
+    material: {kind: enum, commercial: true, values: {
+      silicone: [silicone], acrylic: [acrylic, pmma, resin], stainless_steel: [stainless steel, stainless],
+      plastic: [plastic, abs, polypropylene], metal: [metal, alloy], wax: [wax], gypsum: [gypsum, plaster, stone],
+      zirconia: [zirconia], porcelain: [porcelain, ceramic]}}
+    buyer: {kind: enum, commercial: true, values: {
+      professional: [professional, dentist, clinic, lab, laboratory, technician, student, 专业],
+      consumer: [home, diy, at-home, personal, family, travel, kids, adults]}}
+    model_number: {kind: token, pattern: "\\b[A-Z]{1,4}-?\\d{2,5}[A-Z]{0,3}\\b"}
+
+  micromotor:                  # spec 98-112 reference vertical
+    technology: {kind: enum, commercial: true, values: {
+      brushless: [brushless, brush-less, brush less, 无刷], brushed: [brushed, carbon brush, 有刷]}}
+    max_rpm: {kind: number, unit: rpm, commercial: true, plausible: [1000, 200000]}
+    torque: {kind: number, unit: torque, plausible: [0.1, 50]}
+    power: {kind: number, unit: watt, plausible: [5, 500]}
+    voltage: {kind: number, unit: volt, plausible: [3, 400]}
+    handpiece: {kind: token, commercial: true, pattern: "\\b(H\\d{2,3}[A-Z]\\d?|\\d{3}[A-Z]{1,2}|SDE-H\\d{2}[A-Z]{0,2})\\b"}
+    control_unit: {kind: token, commercial: true, pattern: "\\b(N\\d{1,2}|90|204|207B|M\\d{2,3}|SDE-[A-Z]\\d{2}[A-Z]?)\\b",
+                   context: [control, controller, box, unit, console, micromotor, micro motor, motor, marathon]}
+    cooling: {kind: enum, values: {water: [water cooled, water-cooled, water spray], air: [air cooled, fan]}}
+    pedal: {kind: enum, values: {foot_pedal: [foot pedal, foot control, pedal], knee: [knee control]}}
+
+  denture_base:
+    form: {kind: enum, commercial: true, values: {
+      reline_kit: [reline, relining, rebase], repair_kit: [repair kit, repair], wax: [base plate wax, baseplate wax, wax],
+      resin: [resin, acrylic powder, monomer, liquid], teeth: [denture teeth, false teeth, replacement teeth, beads],
+      full_denture_kit: [diy denture, denture kit, make your own]}}
+    cure: {kind: enum, commercial: true, values: {self_cure: [self cure, self-cure, cold cure], heat_cure: [heat cure, heat-cure],
+                                                   light_cure: [light cure, uv cure]}}
+    hardness: {kind: enum, commercial: true, values: {soft: [soft], hard: [hard]}}
+    shade: {kind: enum, values: {pink: [pink], clear: [clear, transparent], veined: [veined]}}
+
+  dental_models:
+    model_type: {kind: enum, commercial: true, values: {
+      typodont: [typodont], implant_model: [implant], disease_model: [disease, pathology, periodontal],
+      orthodontic_model: [orthodontic, braces], crown_bridge: [crown, bridge], jaw_model: [jaw, maxillary, mandibular],
+      practice_teeth: [practice teeth, exam teeth, replacement teeth], kids_model: [kids, children, deciduous, primary teeth]}}
+    arch: {kind: enum, values: {upper: [upper, maxillary], lower: [lower, mandibular], full: [full mouth, both arches]}}
+    removable_teeth: {kind: enum, commercial: true, values: {"yes": [removable, detachable, screw-in]}}
+    scale: {kind: enum, values: {enlarged: [times, x size, enlarged, 2x, 4x, 6x], standard: [standard, 1:1, life size]}}
+    # configuration attributes: listings that differ here are different products (spec 19 stage 5)
+    implant_count: {kind: token, configuration: true, pattern: "(?i)\\ball[- ]?on[- ]?(\\d)\\b"}
+    tooth_count: {kind: token, configuration: true, pattern: "(?i)\\b(\\d{2})\\s*(?:pcs\\s*)?(?:detachable\\s*|removable\\s*|replaceable\\s*)?(?:teeth|tooth)\\b"}
+
+  implants:
+    product_line: {kind: enum, commercial: true, values: {
+      floss: [floss], water_flosser: [water flosser, oral irrigator], interdental_brush: [interdental],
+      orthodontic_care: [orthodontic, braces, threader], surgical_instrument: [elevator, periotome, osteotome, forceps],
+      instrument_storage: [cassette, caddy, tray], implant_component: [abutment, implant driver, fixture]}}
+
+# market -> attribute schema (markets not listed use the category slug if it has a schema, else generic)
+market_schema:
+  denture_base: denture_base
+  dental_models: dental_models
+  implants: implants
+  micromotor: micromotor
+  micromotors: micromotor
+
+# ---------------------------------------------------------------- Component role, spec 19 stage 5
+# base = the product itself; configuration = base + a specific component set (e.g. N3 + H37L1);
+# bundle = several distinct products sold together; accessory = a part or consumable for another product.
+component_roles:
+  accessory_terms: [replacement, spare, compatible with, fits, for use with, refill, burs only, cable only, adapter, cover, holder]
+  # " + " is NOT a bundle marker: "N3 + H37L1" names one configuration (spec 105)
+  bundle_terms: [bundle, combo, value pack, kit with, with free, plus free, 2 in 1, 3 in 1]
+  # attributes whose values distinguish configurations; a schema can add its own with `configuration: true`
+  configuration_attributes: [handpiece, control_unit]
+
+# ---------------------------------------------------------------- Optional LLM tier, spec 128-129
+# Used only for rows the deterministic tiers leave ambiguous (dental band `review`, or no commercial
+# attribute found), capped per run. Without a provider key the rows simply stay in the review queue.
+llm:
+  enabled: true
+  provider: anthropic           # anthropic | gemini
+  model: claude-sonnet-4-5
+  max_rows_per_run: 200
+  max_tokens: 400
+  prompt_version: knowledge_extract_v1
+  # USD per million tokens, for AI cost tracking (spec 166); update when prices change
+  price_per_mtok: {input: 3.0, output: 15.0}
+  budget_usd_per_run: 1.00      # the tier stops once a run has spent this much (spec 166)
+  llm_confidence: 0.6           # confidence of an accepted LLM value: below the rule tier, visible as a machine judgment
+  timeout_seconds: 30
+  # gemini_model: unset -> the analyst's Gemini model (config/platform/analyst.yaml)
+
+# ---------------------------------------------------------------- Dynamic taxonomy discovery, spec 9-10, 103-104
+# A candidate dimension (commercial attribute) becomes a taxonomy level only when the data supports it:
+# it covers enough products, forms groups of real size, and separates the market commercially (price
+# differs between its groups, permutation-tested). Numeric attributes get data-driven breakpoints
+# (natural breaks with a minimum group size), never fixed bins.
+taxonomy_discovery:
+  min_coverage: 0.30        # share of products that must carry the attribute
+  min_products: 3           # smallest group that can become a node
+  max_depth: 3
+  max_bins: 4               # numeric attributes: at most this many ranges
+  permutations: 400         # permutation test of price separation (eta squared of log price)
+  alpha: 0.10               # a split is "commercially meaningful" when p <= alpha ...
+  min_eta2: 0.05            # ... and it explains at least this share of log-price variance
+  parsimony: 0.10          # prefer the dimension with fewer groups when its eta2 is within 10% of the best
+  seed: 7
+
+# ---------------------------------------------------------------- Market capacity, spec 21-26, 37-38
+capacity:
+  # best-selling listing of a canonical product (spec 21, PRINCIPLES.md definition): the listing with the highest
+  # valid monthly unit-sales metric -- the source's sales value first, else the platform's modeled units.
+  # Review count is deliberately NOT a criterion (an old listing accumulates reviews without current sales).
+  best_listing_metrics: [sales, units_est]
+  best_listing_tie_breakers: [rating]
+  price_tiers: [0.33, 0.67]        # entry < p33 <= mass < p67 <= premium
+  concentration_top: [3, 5, 10]
+
+# ---------------------------------------------------------------- Opportunity engine, spec 35-36, 71-74, 155-156
+# Composite of transparent dimensions (0-100 each). A dimension WITHOUT evidence is left out and the others
+# re-weighted -- it is never scored as a neutral 0.5 -- and its weight is missing from `evidence_coverage`.
+# Below `min_coverage`, or with fewer than `min_products` canonical products, a scope is reported as
+# "insufficient_evidence" and not ranked.
+opportunity:
+  weights:
+    demand: 0.20
+    offline_strength: 0.15
+    growth: 0.15
+    customer_pain: 0.15
+    competition_gap: 0.10
+    pricing_margin: 0.10
+    supplier_availability: 0.05
+    entry_ease: 0.05
+    data_confidence: 0.05
+  scales:                              # linear map value -> 0..100 between x0 (0) and x1 (100), clipped
+    demand: {metric: revenue_est, log10: true, x0: 3.0, x1: 6.0}       # $1k .. $1M modeled monthly revenue
+    growth: {metric: growth_12m, x0: -0.2, x1: 0.5}
+    customer_pain: {metric: quality_gap_share, x0: 0.0, x1: 0.4}
+    competition_gap: {metric: hhi, x0: 5000, x1: 1000}
+    pricing_margin: {metric: margin_rate, x0: 0.0, x1: 0.4}
+    supplier_availability: {metric: supplier_matches, x0: 0, x1: 5}
+    entry_ease: {metric: entrant_success_rate, x0: 0.0, x1: 0.6}
+    data_confidence: {metric: data_confidence, x0: 30, x1: 90}
+    offline_strength: {metric: offline_evidence_score, x0: 0, x1: 100}
+  levels: [[70, High], [45, Medium], [0, Low]]          # dimension score -> evidence-matrix status
+  min_coverage: 0.5
+  min_products: 3
+  node_min_entrants: 5                 # taxonomy nodes: entry success needs this many recent entrants
+  quality_threshold: 4.0               # rating below which a listing counts toward the quality gap
+  # risk flags (spec 156): application classes / title terms that carry regulatory or shipping complexity
+  regulated_applications: [prosthetics, implantology, dental_surgery, orthodontics, dental_imaging]
+  hazmat_terms: [monomer, liquid acrylic, methyl methacrylate, mma, flammable, solvent, alcohol]
+  risk_thresholds: {low_data_confidence: 50, high_concentration_hhi: 2500, low_demand_revenue: 2000, low_margin: 0.15,
+                    thin_fee_headroom: 0.35}
+  # pricing / margin when no genuine unit cost exists: the share of price left after referral, FBA and freight
+  customer_pain_reviews: {metric: review_pain, x0: 0.05, x1: 0.6}   # review text, when supplied, replaces the rating proxy
+  pricing_margin_fallback: {metric: fee_headroom, x0: 0.30, x1: 0.75}
+  # a gate is "flag" (a risk on the row) or "block" (status gated: no score, no rank, reason stated)
+  gates: {regulatory: flag, hazmat: flag}
+  hazmat_negations: ["-free", " free"]       # "alcohol-free" is not a dangerous good
+
+# ---------------------------------------------------------------- landed cost / fee headroom (spec 45-47, 72)
+landed_cost:
+  referral_fee: 0.15               # Amazon US referral fee for most categories
+  fulfilment_fee_fields: ["FBA($)", "fba_fee", "fulfilment_fee"]           # observed in the export
+  weight_fields: ["包装重量（单位换算）", "package_weight", "weight"]           # observed; grams or a text with a unit
+  freight_usd_per_kg: 2.1          # researched 2026-09: China -> US LCL averages about $2.1/kg (sino-shipping.com
+                                   # country guide, Sept 2026; $80-180/CBM all-in). Replace with a forwarder quote
+  min_billable_kg: 0.05
+  target_margin: 0.30              # margin the max-FOB sourcing ceiling must leave
+  duty_rate: null                  # unset: the headline max FOB is before duty. Set per HTS code once verified
+  # researched 2026-09 (not a customs ruling): HTS 9018.49.80 "instruments and apparatus used in dental sciences"
+  # has an MFN general duty of Free (USITC HTS via faqs.org/rulings/tariffs/90184980.html); China-origin goods
+  # may add Section 301 duty -- 25 % on Lists 1-3, 7.5 % on List 4A (ustariffrates.com/section-301-tariffs) --
+  # and list membership of each product's HTS line must be checked. Every scope reports max FOB under each:
+  duty_scenarios: {mfn_free: 0.0, section301_list4a: 0.075, section301_list3: 0.25}
+  duty_rate_by_market: {}          # {market: rate} overrides
+  min_listings: 3                  # a scope needs this many listings with fee and weight
+
+# ---------------------------------------------------------------- offline evidence (spec 31-34)
+offline:
+  # points per evidence row (x magnitude 1 + log10(1 + value)); a scope's score is capped at 100
+  source_weights: {exhibition: 12, distributor_catalog: 15, manufacturer: 10, trade_data: 20, clinic_survey: 15, other: 5}
+  category_factor: 0.5             # category-wide rows (empty applies_to) count half toward every scope
+
+# ---------------------------------------------------------------- data anomalies (spec 154): flagged for review, never dropped
+anomalies:
+  price_z: 3.5               # robust z of log price within a canonical product
+  price_ratio: 1.5           # ...and at least this far from the product median (ratio), so small spreads never flag
+  revenue_tolerance: 0.5     # |source revenue - price x units| / (price x units)
+  jump_ratio: 2.0            # price changed by more than x2 (either direction) since the previous snapshot
+  sales_jump_ratio: 5.0
+
+# ---------------------------------------------------------------- currency normalization (spec 68)
+currency:
+  base: USD
+  marketplaces: {US: USD, CA: CAD, MX: MXN, BR: BRL, UK: GBP, DE: EUR, FR: EUR, IT: EUR, ES: EUR, NL: EUR,
+                 JP: JPY, AU: AUD, IN: INR, AE: AED, SA: SAR, SG: SGD}
+  rates_to_usd: {}         # e.g. {EUR: 1.08}; a non-USD marketplace without a rate stops the run (never guessed)
+  rates_as_of: null        # the date of the rates above
+
+# ---------------------------------------------------------------- product requirements brief (spec 77)
+requirements:
+  top_n: 5                   # top sellers (by modeled revenue) the must-have attributes are read from
+  must_have_share: 0.6       # an attribute value is a must-have when this share of those top sellers state it
+
+# ---------------------------------------------------------------- shopping requirement extraction (spec 43-44)
+needs:
+  about_tolerance: 0.15      # "50000 rpm" without a comparator accepts +/- 15 %
+
+# ---------------------------------------------------------------- accuracy and ranking stability (spec 130-134)
+evaluation:
+  min_labels: 20             # below this many labelled rows only counts are reported, no rates
+  permutations: 300          # ranking stability: random weight draws
+  weight_spread: 0.3         # each weight x U(0.7, 1.3)
+  seed: 7

@@ -1,0 +1,61 @@
+# Module 3 -- Domain relevance lexicons.
+# Each domain has positive prototype phrases (what IS in-domain) and
+# negative prototype phrases (common look-alikes that are NOT). The
+# relevance model vectorizes these with TF-IDF word + character n-grams
+# and scores listings by cosine similarity; stored human corrections
+# (mi_relevance_feedback) are added as supervised training data on
+# every run. A new industry = a new domain block here, no code change.
+
+domains:
+  dental:
+    # Whole-word terms that are strong lexical evidence on their own.
+    core_terms: [dental, dentist, dentistry, denture, dentures, orthodontic, orthodontics, endodontic,
+                 endo, periodontal, prophy, typodont, oral, teeth, tooth, molar, gingival, implant,
+                 implants, abutment, alginate, gypsum, articulator, handpiece, micromotor, hygienist,
+                 intraoral, retainer, aligner, crown, zirconia, cad cam, dds, lab]
+    negative_terms: [jewelry, jewellery, earring, earrings, necklace, pendant, nail polish, nail art, nail drill, manicure, pedicure,
+                     woodworking, candle, poster, canvas, decor, costume, halloween, pet, dog, cat, toy,
+                     toys, automotive, car polish, wristwatch, keychain, sticker, tattoo, paintings, posters,
+                     figurine, ornament, paperweight, lamps, vampire, treats, veterinary, canine, feline]
+    positive:
+      - dental laboratory micromotor handpiece
+      - dental lab polishing motor brushless 50000 rpm
+      - dentist dental clinic equipment
+      - denture base plate wax dental lab
+      - denture base resin acrylic reline kit
+      - dental impression tray alginate
+      - dental stone gypsum plaster model
+      - dental typodont teeth model teaching
+      - orthodontic brackets wires elastics
+      - dental implant analog abutment screw driver
+      - endodontic files root canal endo motor
+      - dental burs diamond carbide polishers
+      - prophy angles fluoride varnish hygienist
+      - dental curing light composite resin restoration
+      - intraoral camera dental x-ray sensor
+      - dental scaler ultrasonic tips cavitron
+      - dental articulator facebow occlusal
+      - denture teeth acrylic artificial teeth
+      - dental wax carving instruments lab tools
+      - oral surgery forceps elevators extraction
+      - teeth whitening dental tray mouth guard
+      - dental suction saliva ejector high volume evacuation
+      - dental chair unit dentist stool
+      - zirconia crown milling dental cad cam
+      - dental floss interdental brush tongue cleaner oral care
+    negative:
+      - jewelry engraving rotary tool
+      - nail drill manicure pedicure electric file
+      - wood carving craft rotary tool
+      - earrings necklace pendant tooth shaped jewelry
+      - wall art poster canvas print
+      - night light lamp decor
+      - pet dog cat chew toy dental treats
+      - candle making soy wax craft
+      - hair dryer beauty salon
+      - kitchen cooking utensil
+      - phone case cover
+      - halloween costume vampire fangs
+      - toy teeth kids game
+      - automotive car polishing buffer
+      - watch repair tool kit

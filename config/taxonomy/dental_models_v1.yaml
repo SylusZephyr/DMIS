@@ -1,0 +1,86 @@
+# Product-type taxonomy for the dental_models category (Milestone 12,
+# multi-category robustness pass).
+#
+# Provenance: scripts/discover_product_types.py's deterministic
+# word-frequency clustering (src/dmie/classification/product_type_discovery.py)
+# was run over the 299 listings classified RELEVANT for dental_models as
+# of 2026-09-23, but produced one 299-listing supercluster (connector
+# words like "teeth"/"teaching" are near-universal in this category, the
+# same documented failure mode as denture_base's "base" word -- see that
+# module's own docstring) even after tightening max_prevalence down to
+# 0.15 and raising min_shared_listings up to 5 (see DECISIONS.md for the
+# parameter sweep). The clustering algorithm could not usefully segment
+# this category's vocabulary on its own.
+#
+# status: draft_autonomous, not "frozen" -- no human reviewer was
+# available (see DECISIONS.md "Multi-category robustness pass -- decisions
+# made under time/API-budget pressure"). Instead of shipping the useless
+# single-cluster output, all 299 real listing titles were read directly
+# and grouped by genuine product function into the 6 types below. This
+# is real evidence-based judgment, not fabrication -- every id below is
+# grounded in dozens of real titles, not invented -- but it has not had
+# a second (human) reviewer confirm it, unlike denture_base_v1. Treat as
+# provisional: a human should review data/exports/dental_models/
+# product_type_discovery_candidates.txt (the raw discovery dump) plus
+# this file before relying on it for a real business decision, and
+# should bump to v2 with a fresh discovery/review cycle rather than
+# silently editing this file if it needs correction (same versioning
+# discipline as denture_base_v1).
+
+version: 1
+category: dental_models
+status: draft_autonomous
+discovered_date: "2026-09-23"
+
+dental_models_taxonomy_v1:
+  - id: DM_TYPODONT
+    name: Typodont / Teaching Teeth Model
+    definition: >
+      Removable-teeth teaching and practice models: standard adult/pediatric
+      typodonts, orthodontic typodonts with braces/arch wire, brushing/
+      flossing practice models, disease/pathology/caries demonstration
+      teeth models, root-canal (RCT) practice teeth, and individual
+      replacement-teeth packs for these systems. By far the largest real
+      group (roughly 200+ of the 299 RELEVANT listings) -- the dominant
+      product type in this category.
+
+  - id: DM_IMPLANT_MODEL
+    name: Dental Implant Training Model
+    definition: >
+      Models built specifically for implant-placement training: mandible/
+      maxillary implant practice models, sinus-lift practice models, and
+      implant crown/bridge analysis/demonstration models. Distinct from
+      DM_TYPODONT: these simulate the surgical/prosthetic implant
+      workflow itself, not general tooth anatomy teaching.
+
+  - id: DM_MANIKIN
+    name: Phantom Head / Training Manikin
+    definition: >
+      Bench-mounted or chair-mounted phantom/mannequin head systems that
+      hold a typodont for chairside simulation training (the head
+      apparatus itself, e.g. "Dental Simulator Mannequin Head," "Phantom
+      Head Model with Bench Mount") -- a distinct hardware product from
+      the teeth model it holds.
+
+  - id: DM_LAB_SUPPLY
+    name: Model Fabrication / Lab Supply
+    definition: >
+      Materials and equipment used to fabricate or prepare physical
+      models, not teaching aids themselves: base-former/impression-tray
+      kits, casting plaster and gypsum die stone, model trimmers and
+      vibrators/oscillators, wax carvers, and dental model storage boxes.
+
+  - id: DM_RESIN_MATERIAL
+    name: 3D-Printer Resin for Dental Models
+    definition: >
+      Photopolymer resin cartridges/bottles marketed specifically for
+      DLP/LCD 3D printing of dental models (crown/bridge, orthodontic,
+      implant models) -- a raw material product, not a finished model.
+
+  - id: DM_ACCESSORY
+    name: Typodont Mounting/Accessory
+    definition: >
+      Standalone accessories sold separately from a teeth model itself:
+      mounting poles, desk stands, and simulation-cheek attachments
+      ("Typodont Model is NOT Included" is a real recurring phrase across
+      these listings).

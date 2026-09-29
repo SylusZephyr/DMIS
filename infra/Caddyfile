@@ -1,0 +1,31 @@
+# HTTPS in front of the command center and the API (same origin).
+{$DMIS_DOMAIN} {
+	encode gzip
+	# largest request the proxy accepts (the API enforces DIP_MAX_UPLOAD_MB itself as well)
+	request_body {
+		max_size 256MB
+	}
+	# security headers on every response (the API also sets a strict CSP on its own responses)
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+	handle /api/* {
+		reverse_proxy api:8000
+	}
+	handle /docs* {
+		reverse_proxy api:8000
+	}
+	handle /openapi.json {
+		reverse_proxy api:8000
+	}
+	handle {
+		# Next.js: inline hydration scripts and inline styles need 'unsafe-inline'; product images come from marketplaces (https:)
+		header Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+		reverse_proxy web:3000
+	}
+}

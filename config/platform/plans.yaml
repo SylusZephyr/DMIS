@@ -1,0 +1,20 @@
+# Commercial plans (Master Prompt 3, P3b). Limits are enforced by the API; null = unlimited.
+# No payment provider is integrated: an admin assigns the plan (POST /orgs/{id}/plan).
+default_plan: enterprise          # plan of the default organization and of new organizations
+plans:
+  starter:
+    markets: 3
+    users: 5
+    records_per_month: 50000
+    features: [projects]
+  professional:
+    markets: 25
+    users: 25
+    records_per_month: 1000000
+    features: [projects, connectors, analyst_ai, reports]
+  enterprise:
+    markets: null
+    users: null
+    records_per_month: null
+    features: [projects, connectors, analyst_ai, reports, api]
+token_ttl_days: 90                # new API tokens expire after this many days (null = never)

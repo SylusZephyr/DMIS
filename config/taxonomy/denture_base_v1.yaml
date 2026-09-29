@@ -1,0 +1,40 @@
+# Frozen product-type taxonomy for the denture_base category (Milestone 11).
+#
+# This is a controlled, closed vocabulary, same enforcement pattern as
+# config/review_taxonomy.yaml: a classifier must map every product into
+# one of these ids, never invent a new one (PRINCIPLES.md principle 9 /
+# "controlled taxonomies, not free-form AI invention").
+#
+# Provenance: discovered by src/dmie/classification/product_type_discovery.py
+# (Stage 1, deterministic word-frequency clustering over the 12 listings
+# classified RELEVANT for denture_base as of 2026-09-21) — see
+# docs/product_taxonomy.md for the full candidate review — then reviewed,
+# renamed, and approved by the user. See DECISIONS.md "M11 — Taxonomy v1
+# frozen" for the approval record and reasoning.
+#
+# Versioning: this file is frozen. Do not edit these three entries or add
+# new ones as new listings appear. A new product type, or any structural
+# change (hierarchy, splitting a type, merging types), requires a new
+# file (denture_base_v2.yaml) and a fresh discovery -> review -> approval
+# cycle — never a silent edit to v1. See docs/taxonomy_denture_base_v1.md.
+
+version: 1
+category: denture_base
+status: frozen
+frozen_date: "2026-09-21"
+
+denture_base_taxonomy_v1:
+  - id: DB_RESIN
+    name: Denture Base Resin
+    definition: >
+      Resin/acrylic materials used for fabrication of denture bases.
+
+  - id: DB_WAX_PLATE
+    name: Denture Base Wax Plate
+    definition: >
+      Wax plates or sheets used in denture fabrication workflows.
+
+  - id: DB_RELINE
+    name: Denture Reline Material/Kit
+    definition: >
+      Materials or kits used to reline, adjust, or repair existing dentures.

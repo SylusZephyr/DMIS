@@ -1,0 +1,24 @@
+# Market analyst agent (Master Prompt 2, phase 6).
+# Answers are computed offline from the database (deterministic, cited). An LLM is used
+# only when use_ai is requested AND ANTHROPIC_API_KEY is set; it rewrites the computed
+# facts into prose and may not add numbers. Every AI call is stored in ai_traces.
+ai:
+  model: claude-opus-5
+  prompt_version: analyst-v1
+  max_tokens: 2000
+top_n: 5
+scope_min_similarity: 0.25
+# Market analyst v3 (Phase 7): facts are computed from the metrics v3 tables; Gemini (free tier, key in
+# GEMINI_API_KEY) only phrases them. A reply containing any number that is not in the facts is rejected
+# and the computed answer is shown instead.
+gemini:
+  model: gemini-2.5-flash
+  endpoint: https://generativelanguage.googleapis.com/v1beta
+  temperature: 0.2
+  max_output_tokens: 1200
+  timeout_seconds: 30
+  prompt_version: analyst-v3.1
+v3:
+  top_n: 5
+  number_tolerance: 0.015       # relative tolerance when matching a number in the AI reply to a computed fact
+  allowed_constants: [95]       # numbers the reply may use without a fact (the interval level)

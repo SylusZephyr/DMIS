@@ -1,0 +1,119 @@
+[project]
+name = "dmie"
+version = "0.1.0"
+description = "Dental Market Intelligence Engine"
+requires-python = ">=3.10"
+dependencies = [
+    "duckdb>=1.0",
+    "pyyaml>=6.0",
+    "pandas>=2.0",
+    "openpyxl>=3.1",
+    # Universal Market Intelligence Engine (src/dmie/engine/) -- all local, no API calls
+    "numpy>=1.24",
+    "scipy>=1.10",
+    "scikit-learn>=1.3",
+    "statsmodels>=0.14",
+    "networkx>=3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    # quality gates (CI): lint, types, dependency audit
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "types-PyYAML",
+    "pip-audit>=2.7",
+    # tests for the optional Redis response cache without a Redis server
+    "fakeredis>=2.23",
+]
+ai = [
+    "anthropic>=0.40",
+    "python-dotenv>=1.0",
+]
+platform = [
+    # Intelligence Platform v2 (src/dip) -- embedded mode needs nothing else
+    "sqlalchemy>=2.0",
+    "polars>=1.30",
+    "fastexcel>=0.12",          # Excel reader for Polars (calamine engine)
+    "qdrant-client>=1.9",
+    "pyarrow>=14",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",
+    # schema migrations for the business DB (alembic/, alembic.ini)
+    "alembic>=1.13",
+    # live data acquisition (src/dip/acquire): HTTP providers and HTML parsing of fetched pages
+    "httpx>=0.27",
+    "beautifulsoup4>=4.12",
+]
+platform-services = [
+    # only when running against real PostgreSQL / Neo4j (infra/docker-compose.yml)
+    "psycopg[binary]>=3.1",
+    "neo4j>=5.0",
+    # shared response cache across API workers (DIP_REDIS_URL)
+    "redis>=5.0",
+]
+observability = [
+    # optional error reporting (SENTRY_DSN); JSON logs need nothing extra
+    "sentry-sdk[fastapi]>=2.0",
+]
+ml = [
+    # optional XGBoost relevance model on human corrections (CPU-only wheel, ~20 MB)
+    "xgboost-cpu>=2.1",
+]
+forecast-extra = [
+    "prophet>=1.1",
+]
+api = [
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "httpx>=0.27",
+]
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+extend-exclude = ["frontend", "data", "alembic/versions"]
+
+[tool.ruff.lint]
+# pyflakes + pycodestyle errors (ruff's defaults); run in CI as `ruff check src tests`
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# style-only findings in files other workstreams are editing; fix when those files are next touched
+"src/dip/storage/graph.py" = ["E702", "E741"]
+"src/dip/api/routes/catalog.py" = ["E702"]
+"tests/platform/test_auth.py" = ["E702"]
+# imports follow a deliberate sys.path insert so `scripts.<sibling>` resolves when run directly
+"scripts/run_pipeline.py" = ["E402"]
+
+[tool.mypy]
+python_version = "3.11"
+ignore_missing_imports = true
+follow_imports = "silent"
+check_untyped_defs = false
+warn_unused_ignores = false
+mypy_path = "src"
+explicit_package_bases = true
+files = ["src/dip/metrics", "src/dip/significance.py", "src/dip/intelligence/analyst_v3.py",
+         "src/dip/cache.py", "src/dip/logging_setup.py", "src/dip/worker.py", "src/dip/api/asgi.py",
+         "src/dip/acquire", "src/dip/sourcing_intel", "src/dip/watch.py", "src/dip/keywords.py", "src/dip/own_sales.py", "src/dip/tabular.py"]
+# `with b.session() as s` is typed through a generator-based context manager; mypy cannot infer `s`
+disable_error_code = ["var-annotated"]
+
+# Permissive start (CI gate introduced with these files already written): numpy/pandas stub noise and
+# Optional-float arguments in the statistical modules. Remove codes here as the modules are tightened.
+[[tool.mypy.overrides]]
+module = ["dip.metrics.*", "dip.significance", "dip.intelligence.analyst_v3"]
+disable_error_code = ["var-annotated", "arg-type", "attr-defined", "index", "call-overload", "list-item"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

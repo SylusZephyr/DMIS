@@ -1,0 +1,19 @@
+# Trend detection (Master Prompt 2, phase 4). Direction = weighted mean of the
+# signals that exist for a scope (market or segment), each mapped to -1..+1.
+signal_weights:
+  demand_history: 3.0      # revenue growth across snapshots / forecast (needs >= 2 periods)
+  listing_growth: 1.0      # listings launched in the last 12 months vs the 12 before (launch dates)
+  new_entrant_share: 1.0   # revenue share of listings launched in the last 12 months
+  review_velocity: 1.0     # review count growth across snapshots (needs review counts)
+labels:
+  growing: 0.25            # direction >= this -> Growing
+  declining: -0.25         # direction <= this -> Declining
+  emerging_share: 0.40     # new-entrant revenue share at/above this in a small scope -> Emerging
+new_entrant_neutral: 0.20  # new-entrant revenue share that counts as neutral momentum
+min_listings: 5            # fewer listings with the needed field -> signal unavailable
+min_periods_for_label: 3   # claims policy: a trend label (Growing / Stable / Declining / Mature / Emerging) needs at
+                           # least this many dated snapshots; below it the label is 'Insufficient evidence' and
+                           # launch-date signals are reported separately as launch activity, never as a trend
+seasonality_min_months: 24
+# confidence = evidence base (by number of periods) x signal agreement x sales coverage factor
+confidence_by_periods: [[1, 0.35], [2, 0.50], [3, 0.65], [6, 0.75], [12, 0.85]]

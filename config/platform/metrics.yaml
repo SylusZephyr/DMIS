@@ -1,0 +1,239 @@
+# Metrics engine v3 (Phase 5). Every constant used by src/dip/metrics lives here, with its rationale.
+# Nothing here is specific to a dataset or category; category-specific rules belong in config/categories.yaml.
+
+sales_observation:
+  # Amazon shows "N+ bought in past month" badges on a fixed ladder; exports built from that badge
+  # (e.g. SellerSprite 子体销量) contain only ladder values, and no value below the first rung.
+  # A value v then means v <= sales < next rung; a missing value means sales < first rung.
+  badge_ladder: [50, 100, 200, 300, 400, 500, 600, 700, 800, 900,
+                 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000,
+                 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000]
+  detect_min_share: 0.98        # >= 98 % of observed values on the ladder -> treat the column as badges
+  detect_min_observed: 10       # need at least this many observed values to decide
+  top_rung_multiplier: 2.0      # upper bound for the top rung (e.g. 100000+ -> [100000, 200000))
+
+demand_model:
+  min_observed: 12              # fewer bounded observations -> intercept-only model (no covariates)
+  min_badged_for_covariates: 10 # badge data: fewer listings above the first rung -> intercept-only (covariates unidentifiable)
+  min_badged_for_heavy_tails: 30  # fewer -> normal errors only (tail shape unidentifiable)
+  covariates: [log_price, rating, log_age_days, category]
+  # log_reviews (log(1 + reviews), when the source has a reviews column) is implemented but OFF: on 16 synthetic
+  # markets with Poisson review counts (~1.5 % of cumulative units) it worsened market size (median |error| 1.5 ->
+  # 3.1 %, bias +1.7 -> +3.9 %, market 95 % coverage 100 -> 81 %; METHODOLOGY §1.5). Add it to this list to enable.
+  # Best-sellers rank (a 'bsr' column: 小类BSR / 大类BSR / rank headers) offers two terms, both OFF (METHODOLOGY §1.5):
+  #   log_bsr    -- log rank; separates sellers (hold-out AUC 0.97) but log rank flattens for slow sellers, so
+  #                 extrapolating below the first badge overstates markets (+13 % bias, 0 % market coverage).
+  #   bsr_score  -- normal score of the rank within the export; unbiased (market error 1.7 vs 1.3 %, coverage 92 %)
+  #                 and passes hold-out validation, but listing intervals narrow (coverage 94 -> 84 %) and markets
+  #                 with many dead listings get worse (5.2 -> 8.4 %). Enable it when your exports carry BSR and the
+  #                 market's hold-out check (integrity) passes with it.
+  price_spline:                 # restricted cubic spline on log price (curved price response; linear beyond the end knots)
+    enabled: true
+    quantiles: [0.05, 0.35, 0.65, 0.95]   # knots at these quantiles of log price -> 2 curvature terms
+    min_informative: 60         # fewer badged (badge data) / observed (exact data) listings -> linear price term only
+  category_min_listings: 5      # sub-categories with fewer listings are pooled as "(other)"
+  error_families: [normal, t10, t5, t3]   # log-unit error families compared by AIC (t = heavy tails)
+  quadrature_nodes: 64          # conditional means for non-normal families
+  ridge: 1.0                    # L2 penalty on standardised coefficients (small-sample stability)
+  bootstrap: 60                 # refits for parameter uncertainty (capped by max_bootstrap_rows)
+  bias_correction: true         # bootstrap bias correction of the censored MLE (small-sample bias; see METHODOLOGY)
+  bootstrap_family_selection: true   # each bootstrap refit re-selects the error family (model uncertainty)
+  interval_inflation: 1.3       # aggregate interval width multiplier: 1.29-1.30 needed for 95 % coverage on
+                                # 80 synthetic markets (normal + heavy-tailed; METHODOLOGY / test_metrics_demand)
+  bootstrap_method: parametric  # parametric | case -- parametric is calibrated on synthetic markets (see METHODOLOGY)
+  max_bootstrap_rows: 20000     # larger data: bootstrap a random subset of this size
+  simulations: 400              # joint draws for market-size and share intervals
+  interval: 0.95
+  seed: 20260925
+  holdout_folds: 5              # cross-validation on real badges
+
+# ---------------------------------------------------------------- 5.2 metrics engine
+engine:
+  simulations: 400              # joint draws for every aggregate interval (shares the demand model's seed)
+  max_kept_draw_cells: 50000000 # product-level draws kept after compute (sims x products, float32) so any set of
+                                # products gets its interval from the same simulation; larger: sets fall back
+  interval: 0.95
+  crossvalidate: true           # hold-out validation of the demand model per market (reported, drives the evidence grade)
+  crossvalidate_max_rows: 5000  # larger markets: validate on a fixed-seed subset
+entry:
+  entrant_window_days: 365      # launched within this window before the snapshot = entrant
+  min_entrants: 5               # fewer entrants in a segment -> shrink toward the market's entrants
+  prior_strength: 5             # pseudo-entrants of market evidence used for shrinkage (empirical Bayes)
+unit_economics:
+  referral_fee: 0.15            # marketplace referral fee when the source has none (Amazon US default for most categories)
+  unit_cost_fields: ["保底生产成本", "unit_cost", "production_cost", "cost"]
+  fulfilment_fee_fields: ["FBA($)", "fba_fee", "fulfilment_fee"]
+  min_valid_cost_share: 0.0     # a cost must be > 0 and < price to be used; others are quarantined with a reason
+  derived_cost_max_cv: 0.06     # (cost + fulfilment fee) / price nearly constant (coefficient of variation below this, n >= 20)
+                                # -> the field is computed from price (a target cost ceiling), not an observed cost
+  target_monthly_profit: 500    # an entrant "succeeds economically" above this profit (USD/month)
+  target_monthly_revenue: 5000  # used instead when no genuine unit costs exist
+quality:
+  threshold: 4.0                # listings rated below this count toward the quality gap (customer-pain proxy)
+  rating_bar_top_share: 0.10    # rating bar = median rating of the top 10 % of listings by estimated revenue
+opportunity:
+  # Absolute transforms (value -> 0..1), identical for every market, so the index is comparable across markets.
+  # [x0, x1]: x0 -> y0 (default 0), x1 -> y1 (default 1), linear and clipped; log10 scales where stated.
+  components:
+    demand:      {metric: segment_revenue_est, scale: log10, x0: 3.0, x1: 6.0, weight: 0.25}   # $1k -> 0, $1M/month -> 1
+    entry:       {metric: entrant_success_rate, x0: 0.0, x1: 0.6, weight: 0.25}
+    margin:      {metric: margin_rate_median, x0: 0.0, x1: 0.40, weight: 0.20}
+    competition: {metric: hhi, x0: 5000, x1: 1000, weight: 0.15}                              # HHI 5000 -> 0, 1000 -> 1
+    quality_gap: {metric: quality_gap_share, x0: 0.0, x1: 0.40, y0: 0.5, y1: 1.0, weight: 0.10}  # upside only: no gap = neutral 0.5
+    saturation:  {metric: unbadged_share, x0: 0.95, x1: 0.50, weight: 0.05}                   # 95 % dead listings -> 0
+  product:
+    segment_weight: 0.7         # product index = weighted geometric mean of its segment's index and its own position
+    price_band_weight: 0.2      # demand per listing in the product's price band vs the segment (log2 lift -1..+1)
+    quality_room_weight: 0.1    # rating bar minus the product's rating (0..1 star)
+  missing_component_score: 0.5  # a component the source cannot measure (e.g. margin without unit costs, entry without
+                                # launch dates) counts as neutral 0.5, so indices with different coverage are comparable;
+                                # the coverage (share of the weight actually measured) is reported next to the index
+  levels: [[40, "Low"], [55, "Moderate"], [70, "High"], [101, "Very high"]]   # [upper bound, label]
+  high_from: 55                 # "opportunities" counted in dashboards: index >= this (High and above)
+evidence_grade:
+  # A: >= 50 listings, >= 25 % badged, CV AUC >= 0.75 ; B: >= 20, >= 10 %, AUC >= 0.65 ; C: >= 10, >= 5 % badged ; else D
+  A: {n: 50, badged_share: 0.25, auc: 0.75}
+  B: {n: 20, badged_share: 0.10, auc: 0.65}
+  C: {n: 10, badged_share: 0.05}
+  min_auc_any: 0.60             # a measured hold-out AUC below this caps any grade at D (same level as accuracy.auc_watch)
+price_bands: 4                  # quantile bands within a segment
+
+# ---------------------------------------------------------------- 5.3 category boundary + segmentation
+scope:
+  # Each marketplace sub-category found in the data is scored against the market's definition in
+  # config/categories.yaml (text before "Excludes" = include, after = exclude, "Boundary cases" = neutral).
+  name_weight: 2.0              # a hit in the sub-category name counts this many title-share points
+  out_margin: 0.30              # exclude evidence must exceed include evidence by this to exclude
+  in_margin: 0.15               # include evidence must exceed exclude evidence by this to include
+  max_auto_exclude_share: 0.25  # a sub-category holding more of the market's listings is never auto-excluded (review)
+  # auto-exclusion also requires the titles to agree: exclude-term title share strictly above include-term share
+  min_term_length: 3
+  generic_terms: [dental, dentist, oral, teeth, tooth, product, products, care, kit, kits, supplies, supply,
+                  tools, tool, set, sets, adult, adults, kids, professional, general, use, material, materials]
+segmentation:
+  split_min_listings: 12        # a sub-category with at least this many listings is considered for splitting
+  min_segment_share: 0.05       # clusters below this share of the sub-category (clipped to 3..10 listings) are merged
+  min_segment_listings: 3       #   into their most similar sibling (title TF-IDF centroid)
+  max_segment_listings_floor: 10
+  min_split_silhouette: 0.12    # a split is kept only if its clusters are distinct (title TF-IDF cosine silhouette):
+                                # variants of one product type measured 0.03-0.08, distinct product types 0.16-0.58
+  sibling_common_share: 0.5     # a keyword in more than this share of a sub-category's segments is not distinctive there
+  label_terms: 2                # distinctive terms appended to the sub-category name in a split segment's label
+  keywords: 8                   # keywords per segment (class-based TF-IDF, uni- and bi-grams)
+  stop_terms: [pcs, pc, pack, packs, piece, pieces, count, ct, set, sets, kit, kits, lot, bundle, box,
+               new, upgraded, upgrade, latest, professional, premium, quality, high, best, top, great, perfect,
+               black, white, blue, pink, red, green, yellow, purple, orange, clear, transparent, gray, grey, silver, gold,
+               small, medium, large, size, sizes, mini, big, inch, inches, cm, mm, ml, oz, lb, lbs,
+               adult, adults, kids, children, child, women, men, unisex, portable, easy, use, home, travel, gift, gifts,
+               daily, day, days, time, times, free, bpa, pro, plus, ultra, super, extra, multi, multiple, pcs,
+               compatible, suitable, replacement, include, includes, including, designed, ideal]
+  description_template:
+    en: "{n} listings · {price} · est. {revenue}/month ({rev_lo}–{rev_hi}) · led by {brand} ({share}) · {entrants} launched in the last year · keywords: {keywords}"
+    zh: "{n} 个商品 · {price} · 估计月销售额 {revenue}（{rev_lo}–{rev_hi}）· 领先品牌 {brand}（{share}）· 近一年新上架 {entrants} 个 · 关键词：{keywords}"
+
+# ---------------------------------------------------------------- 5.4 gap analysis -> recommended product
+gaps:
+  min_support: 5                # a feature needs at least this many listings with it AND without it
+  max_candidates: 40            # most frequent candidate features per segment (terms + specs + price bands)
+  bootstrap: 400                # listing bootstrap for lift intervals
+  fdr_q: 0.10                   # Benjamini-Hochberg false discovery rate for "significant" gaps
+  max_features: 3               # features combined in a recommended spec
+  min_segment_listings: 8       # smaller segments get no gap analysis (too little evidence)
+  spec_buckets:                 # numeric specs are bucketed on these edges (feature = "rpm 40k-60k" etc.)
+    rpm: [0, 20000, 35000, 45000, 60000, 1000000]
+    watt: [0, 30, 60, 100, 1000000]
+    pack: [0, 1.5, 5, 12, 30, 1000000]
+    ml: [0, 50, 150, 400, 1000000]
+    gram: [0, 50, 200, 500, 1000000]
+
+# ---------------------------------------------------------------- Phase 6 competitor intelligence
+brands:
+  leader_p_top: 0.5             # P(rank 1 across the joint simulation) at or above this -> "leader"
+  min_listings_for_signals: 2   # brands with fewer listings get no strength/weakness signals (too little evidence)
+  rating_gap: 0.15              # Bayesian-average rating this far below/above the market mean -> weakness/strength
+  price_premium: 0.15           # median price index >= 1 + this -> premium; <= 1 - this -> value priced
+  entrant_driven_share: 0.5     # >= this share of a brand's revenue from entrants -> "growth from new listings"
+  cohort_quarters: 12           # launch cohorts shown (most recent quarters)
+  min_launches_for_test: 8      # fewer launches in both windows -> no momentum test
+  fdr_q: 0.10                   # Benjamini-Hochberg level for momentum and snapshot changes
+
+# ---------------------------------------------------------------- Phase 6 launch simulator
+launch:
+  simulations: 2000             # posterior-predictive draws per scenario (common random numbers across scenarios)
+  seed: 20260926
+  neighbours: 25                # nearest listings that vote for the idea's segment
+  comparables: 10
+  default_age_days: 180         # the listing is simulated at this age (steady state after launch)
+  segment_offset_prior: 5       # pseudo-listings shrinking a segment's residual offset toward the market (empirical Bayes)
+  price_grid_points: 25
+  price_grid_quantiles: [0.05, 0.95]   # price curve stays inside the segment's observed prices
+  risks:
+    hhi_high: 2500              # US DOJ/FTC "highly concentrated" threshold
+    entrant_success_low: 0.2
+    similarity_high: 0.8        # the idea is nearly a copy of an existing listing
+    similarity_low: 0.08        # the idea does not resemble anything in the market: placement unreliable
+
+# ---------------------------------------------------------------- Phase 6 shopping mode
+shopping:
+  relevance_min: 0.08           # absolute floor of title relevance for a candidate
+  relevance_floor: 0.35         # ... and at least this share of the best match
+  map_points: 200
+  profiles:                     # utility weights over criteria percentiles (match, quality, proof, price)
+    default:      {match: 0.35, quality: 0.25, proof: 0.20, price: 0.20}
+    beginner:     {match: 0.30, quality: 0.30, proof: 0.30, price: 0.10}   # proven, well-rated
+    professional: {match: 0.45, quality: 0.30, proof: 0.10, price: 0.15}   # the exact spec first
+    budget:       {match: 0.30, quality: 0.20, proof: 0.10, price: 0.40}
+
+# ---------------------------------------------------------------- Phase 8 alerts on significant changes
+alerts:
+  fdr_q: 0.05                   # Benjamini-Hochberg level over the changes tested in one run
+  important_change: 0.5         # a significant change of at least +/-50% is "important", else "notice"
+  min_segment_change: 0.2       # segment demand shifts smaller than 20% are not reported even when significant
+
+# ---------------------------------------------------------------- Phase 8 accuracy dashboard targets
+accuracy:
+  synthetic_markets: 4          # per scenario and validation run
+  synthetic_scenarios: [specified, heavy_tails, brand_effects, curved_price, curved_price_brands, dead_listings,
+                        brand_noise]   # dip.metrics.synthetic.SCENARIOS; the checks are scored on the worst scenario
+  synthetic_listings: 400
+  size_error_target: 0.05       # median |relative error| of estimated market size
+  size_error_watch: 0.10
+  coverage_target: 0.90         # share of 95% intervals containing the truth
+  coverage_watch: 0.80
+  top_category_target: 0.9
+  top_category_watch: 0.75
+  auc_target: 0.70              # per-market hold-out: can the model tell badged from unbadged listings
+  auc_watch: 0.60
+
+# ---------------------------------------------------------------- growth and forecast (random-effects log-linear trend)
+forecast:
+  min_periods: 3                # snapshots needed before a trend is fitted
+  alpha: 0.05                   # significance level of the trend test
+  horizons_months: [3, 6, 12]
+  min_measurement_sd: 0.01      # floor on a snapshot's log-scale standard error (exact data)
+
+# ---------------------------------------------------------------- segment detail (price bands inside a segment)
+segment_detail:
+  bootstrap: 2000               # percentile bootstrap over listings
+  seed: 0                       # fixed: the same data always gives the same interval
+  max_peers_plotted: 400        # product page: segment peers drawn around the product (largest by revenue)
+
+# ---------------------------------------------------------------- opportunity board (recommended concepts across markets)
+board:
+  max_per_market: 8             # recommended concepts simulated per market (highest opportunity index first)
+
+integrity:
+  # Truth harness (src/dip/metrics/integrity.py): checks every processed market for numbers that disagree,
+  # break their own bounds, or rest on evidence that failed validation. fail = a displayed number is wrong or
+  # unsupported; warn = it needs a caveat or a decision.
+  rel_tolerance: 0.02          # two numbers for the same quantity may differ by at most 2 %
+  min_badged_listings: 10      # fewer observed sales than this: the demand model has nothing to learn from
+  min_holdout_auc: 0.65        # the model must tell badged from unbadged listings clearly better than chance (0.5)
+  min_coverage_80: 0.65        # nominal 80 % intervals must contain the held-out truth at least this often
+  min_coverage_95: 0.85
+  max_undecided_revenue_share: 0.20   # observed revenue from listings whose category scope is still "review"
+  min_launch_date_share: 0.5   # listings with a readable launch date (age-based metrics need it)
+  max_excluded_sales_share: 0.0  # observed units on relevant listings left out for data reasons (e.g. no price): any is disclosed
+  min_snapshots_for_trend: 3
+  own_sales_min_listings: 3    # your Seller Central sales for fewer listings than this: reported, not judged
+  own_sales_max_days_apart: 45 # a report period's midpoint within this many days of the snapshot is comparable

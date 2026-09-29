@@ -1,0 +1,11 @@
+# Supplier intelligence upgrade (Master Prompt 3, P3b): cooperation history and ranking.
+ranking_weights:          # components with no evidence are left out and reported
+  fit: 0.35               # segment match (supplier_matches) or catalogue score
+  cooperation: 0.30       # mean rating of past interactions (1-5), shrunk toward neutral with few ratings
+  price: 0.15             # price level from quotes: low 1.0 / mid 0.6 / high 0.3
+  lead_time: 0.10         # median quoted lead time (shorter is better)
+  reliability: 0.10       # 1 - share of interactions that are issues
+cooperation_prior: 3      # pseudo-ratings of 3/5 added before averaging (shrinkage)
+price_level: {low: 0.85, high: 1.15}   # supplier median quote / market median quote
+lead_time_days: {best: 15, worst: 90}
+interaction_kinds: [inquiry, quote, sample, order, audit, issue]

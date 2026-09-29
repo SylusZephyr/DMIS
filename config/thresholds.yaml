@@ -1,0 +1,57 @@
+# Confidence thresholds for the hybrid relevance classifier.
+# See src/dmie/classification/classifier.py and docs/human_review_workflow.md.
+#
+# 3-tier human-review routing by confidence:
+#   >= automatic_threshold        -> auto_accepted (used as-is)
+#   sampling_threshold to automatic -> sample_for_qa (used, but flagged for periodic audit)
+#   < sampling_threshold          -> needs_review (forced to UNCERTAIN, held for a human)
+# These are NOT the textbook 95%/70% split by assumption -- automatic_threshold
+# is empirically derived from the gold dataset (scripts/calibrate_thresholds.py).
+# sampling_threshold is NOT yet empirically calibrated: the classifier
+# currently only ever produces confidence 0.95 (rules) or 0.0 (AI
+# unavailable) -- there is no real data between them to calibrate a middle
+# tier against yet. Kept at a reasoned default pending real AI-confidence
+# data; re-run the calibration script once the AI stage is configured.
+relevance:
+  rules_confidence: 0.95
+  automatic_threshold: 0.95   # empirically: 97.4% precision (38/39) on the 50-row gold set
+  sampling_threshold: 0.80    # not yet empirically calibrated -- see docs/human_review_workflow.md
+
+# Product-type classification (Milestone 11 Stage 2). See
+# src/dmie/classification/product_type_classifier.py. Same 3-tier shape as
+# `relevance` above: >= automatic -> auto_accepted; sampling..automatic ->
+# kept as stated but flagged for review; < sampling -> forced to the
+# literal value "UNCERTAIN" (never a guess). Not yet empirically
+# calibrated (no real dataset run exists yet) -- these are the user's
+# reasoned example thresholds from the M11 Stage 2 approval, kept as
+# defaults pending a real calibration run once the AI stage is configured.
+product_type:
+  rules_confidence: 0.95        # a title scores signal words for exactly one taxonomy id
+  rules_ambiguous_confidence: 0.50  # a title scores signal words for 0 or >1 ids -- defer to AI
+  automatic_threshold: 0.85     # AI (or rules) confidence >= this -> auto_accepted
+  sampling_threshold: 0.60      # AI confidence in [0.60, 0.85) -> kept, flagged needs_review
+                                  # below 0.60 (or AI unavailable) -> forced product_type = "UNCERTAIN"
+
+# Entity resolution (listing-to-product matching). See
+# src/dmie/matching/resolution.py and docs/entity_resolution.md.
+entity_resolution:
+  match_threshold: 0.90     # composite score >= this -> confirmed MATCH
+  no_match_threshold: 0.40  # composite score <= this -> confirmed NO_MATCH
+                             # (between the two -> Stage 7 AI arbitration / needs_review)
+  weights:
+    title: 0.5
+    brand: 0.3
+    attribute: 0.2
+
+# Opportunity engine (Milestone 9). Every threshold here is a documented,
+# adjustable judgment call, not a hidden constant -- see
+# docs/opportunity_signals.md for what each one means and why.
+opportunity:
+  demand_percentile: 0.75              # "high demand" = top 25% of category products by observed demand
+  min_products_for_percentile: 4       # below this, a percentile comparison isn't meaningful -- reports insufficient_data instead
+  many_listings_threshold: 3           # "many listings" = total_listing_count >= this
+  high_complaint_count_threshold: 3    # "high complaint frequency" = >= this many extracted review insights...
+  high_complaint_severity_threshold: 3.5  # ...OR mean severity >= this
+  low_differentiation_price_cov_threshold: 0.15  # price coefficient of variation <= this = commodity/low differentiation
+  accessory_activity_threshold: 2      # >= this many ACCESSORY_ONLY listings in category (weak proxy, see docs)
+  limited_bundle_offering_threshold: 0.2  # <= this fraction of category listings read as a bundle/combo

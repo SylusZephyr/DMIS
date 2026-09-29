@@ -1,0 +1,83 @@
+# Live data acquisition (src/dip/acquire). Every provider is off until its credentials are present in the
+# environment; nothing is fetched otherwise. SellerSprite uploads keep working unchanged -- live data goes
+# through the same pipeline (ingestion -> relevance -> products -> metrics) as a dated snapshot.
+
+marketplace: US                 # Amazon marketplace of the pilot (Keepa domain id below)
+keepa_domain: 1                 # 1 = amazon.com
+
+# Which provider serves each capability, in order of preference (first configured one wins).
+# Licensed APIs come first; direct page fetching is a last resort and is disabled by default.
+capabilities:
+  amazon_search:   [keepa, scraper_api, paapi, amazon_html]
+  amazon_detail:   [keepa, scraper_api, paapi, amazon_html]
+  amazon_history:  [keepa]                              # price / rank / sales-badge / rating history
+  amazon_reviews:  [scraper_api, amazon_html]           # review text (Keepa and PA-API do not carry it)
+
+# Direct fetching of amazon.com pages. Amazon's Conditions of Use do not permit automated access; enable
+# only where you have assessed that risk. Pages behind sign-in (e.g. full review lists) are not attempted.
+direct_html:
+  enabled: false
+  user_agent: "Mozilla/5.0 (compatible; DMIS/2; +https://example.invalid/dmis)"
+  min_seconds_between_requests: 6
+
+providers:
+  keepa:
+    env: [DIP_KEEPA_API_KEY]
+    base_url: https://api.keepa.com
+    requests_per_minute: 20       # Keepa meters by tokens; the client also stops when tokensLeft reaches 0
+    cost_usd_per_request: 0.002
+  paapi:
+    env: [DIP_PAAPI_ACCESS_KEY, DIP_PAAPI_SECRET_KEY, DIP_PAAPI_PARTNER_TAG]
+    host: webservices.amazon.com
+    region: us-east-1
+    requests_per_minute: 50
+    cost_usd_per_request: 0.0
+  scraper_api:
+    # Any commercial Amazon data API that returns JSON (product search, product, reviews). Point the URL
+    # templates at your vendor and map its fields below; the defaults follow the common
+    # "type=search|product|reviews" convention several vendors share.
+    env: [DIP_SCRAPER_API_KEY]
+    url_env: DIP_SCRAPER_API_URL           # e.g. https://api.vendor.example/request
+    params:
+      search:  {api_key: "{key}", type: search, amazon_domain: amazon.com, search_term: "{term}", page: "{page}"}
+      product: {api_key: "{key}", type: product, amazon_domain: amazon.com, asin: "{asin}"}
+      reviews: {api_key: "{key}", type: reviews, amazon_domain: amazon.com, asin: "{asin}", page: "{page}"}
+    fields:
+      search_results: search_results
+      product: product
+      reviews: reviews
+    requests_per_minute: 60
+    cost_usd_per_request: 0.004
+  amazon_html:
+    env: []                                 # no key; gated by direct_html.enabled
+    requests_per_minute: 10
+    cost_usd_per_request: 0.0
+
+run:
+  max_listings_per_market: 400     # listings kept per snapshot (search results, then tracked ASINs)
+  search_pages_per_term: 3
+  track_existing_listings: true    # always re-observe listings the market already knows
+  reviews_per_listing: 30          # review text fetched for the best-selling listings
+  reviews_listings: 40             # how many listings get review text
+  history_months: 12               # history backfill: monthly snapshots rebuilt from provider history
+  budget_usd_per_run: 5.0          # a run stops (and says so) when its estimated provider cost reaches this
+  cache_hours: 20                  # identical provider requests within this window are served from cache
+
+schedule:
+  # dmis scheduler: a live snapshot per market on this cadence (only for markets with a configured provider)
+  every_days: 7
+
+watchlist:
+  # competitor watchlist (src/dip/watch.py): chosen ASINs observed more often than whole markets.
+  # Without a provider the watchlist still works from each processed snapshot (uploads or live runs).
+  max_items: 200
+  every_hours: 24                  # live re-observation cadence (scheduler), when a detail provider is configured
+  budget_usd_per_run: 1.0
+  alerts:                          # a change is reported when it reaches these (alerts must not be noise)
+    price_move: 0.08               # price moved by at least 8 %
+    rating_drop: 0.2               # rating fell by at least 0.2 stars
+    review_surge: 0.10             # rating/review count grew by at least 10 % between observations
+    bsr_move: 0.30                 # best-sellers rank moved by at least 30 %
+    sales_move: 0.25               # monthly sales estimate moved by at least 25 %
+    # a change of the "bought in past month" badge tier (e.g. 100+ -> 200+) is always reported
+  important_price_drop: 0.15       # a price cut at least this deep is 'important' (reaches e-mail), else 'notice'

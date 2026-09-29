@@ -1,0 +1,99 @@
+# Production deployment: company workstation/server (LOCAL MODE) or a cloud VM (SaaS mode).
+#   cp infra/prod.env.example infra/prod.env   # edit passwords, domain, SMTP
+#   docker compose -f infra/docker-compose.prod.yml --env-file infra/prod.env up -d --build
+#   docker compose -f infra/docker-compose.prod.yml exec api python scripts/dmis.py create-user admin@co.com Admin --role admin
+# Caddy terminates HTTPS (automatic certificates for DMIS_DOMAIN; `localhost` uses a local CA).
+# Scale: the API runs DIP_API_WORKERS uvicorn processes (default 2) sharing PostgreSQL, Neo4j, Qdrant and the
+# Redis response cache; uploads are queued (DIP_JOB_MODE=queue) and processed by the `worker` replicas.
+# Smoke test of this file: scripts/smoke_docker.sh (CI job "docker-smoke").
+x-platform: &platform
+  build: { context: .., dockerfile: Dockerfile }
+  image: dmis-platform
+  restart: unless-stopped
+  env_file:
+    - { path: prod.env, required: false }      # SMTP, API keys, DIP_* overrides (see prod.env.example)
+  environment:
+    DIP_POSTGRES_URL: postgresql+psycopg://dip:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in infra/prod.env}@postgres:5432/dip
+    DIP_NEO4J_URI: bolt://neo4j:7687
+    DIP_NEO4J_USER: neo4j
+    DIP_NEO4J_PASSWORD: ${NEO4J_PASSWORD:?set NEO4J_PASSWORD in infra/prod.env}
+    DIP_QDRANT_URL: http://qdrant:6333
+    DIP_REDIS_URL: redis://redis:6379/0
+    DIP_JOB_MODE: queue
+    DIP_AUTH: "on"
+    DIP_INBOX_DIR: /app/data/inbox
+    DIP_LOG_FORMAT: ${DIP_LOG_FORMAT:-json}
+  volumes:
+    - lake:/app/data/lake
+    - platform:/app/data/platform
+    - inbox:/app/data/inbox
+    - ../backups:/app/backups
+  depends_on:
+    postgres: { condition: service_healthy }
+    redis: { condition: service_healthy }
+    neo4j: { condition: service_started }
+    qdrant: { condition: service_started }
+
+services:
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment: { POSTGRES_USER: dip, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}", POSTGRES_DB: dip }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dip -d dip"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--save", "", "--appendonly", "no", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  neo4j:
+    image: neo4j:5
+    restart: unless-stopped
+    environment: { NEO4J_AUTH: "neo4j/${NEO4J_PASSWORD}" }
+    volumes: [neo4jdata:/data]
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    restart: unless-stopped
+    volumes: [qdrantdata:/qdrant/storage]
+  api:
+    <<: *platform
+    command: ["sh", "-c", "exec python scripts/dmis.py serve --host 0.0.0.0 --port 8000 --workers $${DIP_API_WORKERS:-2}"]
+  worker:
+    <<: *platform
+    command: ["python", "scripts/dmis.py", "worker"]
+    healthcheck: { disable: true }
+    deploy: { replicas: 2 }
+  scheduler:
+    <<: *platform
+    command: ["python", "scripts/dmis.py", "schedule", "--every-minutes", "60"]
+    healthcheck: { disable: true }
+  web:
+    build: { context: ../frontend, args: { DIP_API_URL: "http://api:8000" } }
+    restart: unless-stopped
+    depends_on: [api]
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment: { DMIS_DOMAIN: "${DMIS_DOMAIN}" }
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    depends_on: [web, api]
+
+volumes:
+  pgdata: {}
+  neo4jdata: {}
+  qdrantdata: {}
+  lake: {}
+  platform: {}
+  inbox: {}
+  caddydata: {}

@@ -1,0 +1,49 @@
+# Keyword intelligence (src/dip/keywords.py): keyword exports (SellerSprite 关键词挖掘 / 反查关键词, or any tool with
+# the same kind of columns) turned into keyword demand, competition and gaps per market and sub-category.
+# Nothing here is specific to a category.
+
+columns:
+  # Header synonyms per field, matched like listing imports (case-insensitive, punctuation and units stripped,
+  # token-contained, CJK substring). Add synonyms here (never in code) when a tool names a column differently.
+  keyword:          [keyword, keywords, search term, search terms, customer search term, 关键词, 关键字, 搜索词]
+  translation:      [translation, keyword translation, 关键词翻译, 翻译]
+  searches:         [searches, monthly searches, search volume, monthly search volume, est searches, 月搜索量, 搜索量, 月搜索]
+  purchases:        [purchases, monthly purchases, purchase volume, 月购买量, 购买量]
+  purchase_rate:    [purchase rate, conversion rate, cvr, 购买率, 转化率]
+  impressions:      [impressions, 展示量]
+  clicks:           [clicks, 点击量]
+  spr:              [spr, 八天上首页单量]
+  title_density:    [title density, 标题密度]
+  products:         [products, product count, competing products, results, search results, 商品数, 竞品数]
+  supply_demand:    [supply demand ratio, supply and demand ratio, supply demand, 供需比]
+  ad_products:      [ad products, sponsored products, ads competitor count, 广告竞品数]
+  click_share:      [click share, click concentration, top3 click share, 点击总占比, 点击集中度]
+  conversion_share: [conversion share, top3 conversion share, 转化总占比]
+  ppc_bid:          [ppc bid, bid, suggested bid, ppc, cpc, ppc竞价, 竞价, 建议竞价]
+  aba_rank:         [aba rank, search frequency rank, sfr, aba周排名, aba排名, 搜索频率排名]
+  relevance:        [relevance, relevancy, 相关度, 流量占比]
+
+min_header_score: 0.7        # a header maps to a field only from this score up
+required: [keyword, searches]
+
+matching:
+  # a keyword belongs to a sub-category through the market's own listings: a listing matches when its title
+  # contains every content word of the keyword; the keyword goes to the sub-category holding most of the matched
+  # listings' sales (share reported as the assignment confidence)
+  min_listings: 2            # fewer matched listings -> the keyword stays unassigned (shown, never dropped)
+  stopwords: [for, and, the, with, a, an, of, to, in, on, kit, set, pack, pcs, piece, pieces]
+
+score:
+  # keyword opportunity 0-100: demand against competition; components are 0-1 (percentile rank inside the
+  # market's keyword list), a missing column drops its component and the coverage is reported
+  weights:
+    searches: 0.35           # more searches: better
+    purchase_rate: 0.15      # more buyers per search: better
+    products: 0.15           # fewer competing products: better
+    title_density: 0.15      # fewer first-page listings naming the keyword in their title: better
+    ppc_bid: 0.10            # cheaper clicks: better
+    click_share: 0.10        # clicks less concentrated on the top three: better
+  gap:
+    # an under-served keyword: real demand that few listings target in their titles
+    min_searches_pct: 0.5    # at least the market's median monthly searches
+    max_title_density: 5     # at most this many first-page listings with the keyword in the title

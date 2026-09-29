@@ -1,0 +1,15 @@
+# Competitor intelligence (Master Prompt 2, phase 5).
+position:            # by share of the market (revenue, else sales, else product count)
+  leader_share: 0.20       # rank 1 with at least this share, or any brand with >= leader_share * 1.5
+  challenger_share: 0.08
+  follower_share: 0.02     # below -> Niche
+weakness:
+  high_price_index: 1.20   # median price / segment median price at/above this
+  low_price_index: 0.80
+  rating_gap: 0.20         # this far below the market's average rating
+  stale_months: 12         # no listing launched within this many months
+  complaint_share: 0.15    # a complaint theme in >= this share of the brand's reviews
+changes:
+  price_change: 0.05       # |median price change| of the same listings reported from this
+  share_change: 0.02       # share change (absolute) reported from this
+  rating_change: 0.1

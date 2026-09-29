@@ -1,0 +1,7 @@
+# Override for the smoke test (scripts/smoke_docker.sh): publishes the API on 127.0.0.1:${SMOKE_PORT:-8105}
+# and leaves out web / caddy / scheduler (start only the services named on the command line).
+services:
+  api:
+    ports: ["127.0.0.1:${SMOKE_PORT:-8105}:8000"]
+  worker:
+    deploy: { replicas: 1 }

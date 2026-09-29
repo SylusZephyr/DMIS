@@ -1,0 +1,28 @@
+# Production-style services for Intelligence Platform v2.
+# Without these, the platform runs on embedded fallbacks (SQLite, embedded
+# graph, Qdrant local mode). With them:
+#   docker compose -f infra/docker-compose.yml up -d
+#   then set the variables in infra/.env.example before starting the API.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: dip
+      POSTGRES_PASSWORD: dip
+      POSTGRES_DB: dip
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/dip-password
+    ports: ["7474:7474", "7687:7687"]
+    volumes: [neo4jdata:/data]
+  qdrant:
+    image: qdrant/qdrant:v1.12.4
+    ports: ["6333:6333"]
+    volumes: [qdrantdata:/qdrant/storage]
+volumes:
+  pgdata: {}
+  neo4jdata: {}
+  qdrantdata: {}

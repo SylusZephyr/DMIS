@@ -1,0 +1,188 @@
+# Supplier sourcing across Chinese marketplaces (src/dip/sourcing_intel). Each platform is off until its
+# credentials are in the environment. Field names inside platform responses differ between API versions and
+# between the third-party aggregators many teams use for 1688 / Taobao / Alibaba.com, so every platform's
+# field mapping is here (dotted paths; the first present one wins) -- adding a vendor is a config change.
+
+fx:
+  # never guessed: a rate with its date and source (USD/CNY 6.7204 on 2026-09-25, Trading Economics /
+  # Federal Reserve H.10 series); refresh when quotes are compared across weeks
+  rates_to_usd: {CNY: 0.1488, USD: 1.0, HKD: 0.1284}
+  rates_as_of: "2026-09-25"
+
+platforms:
+  "1688":
+    label: "1688.com (official cross-border open API)"
+    kind: ali1688
+    env: [DIP_1688_APP_KEY, DIP_1688_APP_SECRET]
+    token_env: DIP_1688_ACCESS_TOKEN        # optional: some namespaces need an authorised token
+    gateway: https://gw.open.1688.com/openapi
+    api: param2/1/com.alibaba.fenxiao.crossborder/product.search.keywordQuery
+    image_api: param2/1/com.alibaba.fenxiao.crossborder/product.search.imageQuery
+    page_size: 50
+    currency: CNY
+    fields:
+      items: [result.result.data, result.data, data]
+      id: [offerId, offer_id, id]
+      title: [subject, title]
+      title_en: [subjectTrans, title_en, titleTranslated]
+      url: [detailUrl, url]
+      image: [imageUrl, image, pic_url]
+      price: [priceInfo.price, price, priceInfo.consignPrice]
+      price_tiers: [priceRangeList, price_ranges, priceRanges]
+      moq: [minOrderQuantity, moq, beginAmount]
+      sold: [monthSold, month_sold, soldOut]
+      repurchase_rate: [repurchaseRate, repurchase_rate]
+      supplier: [companyName, sellerName, shop_name, supplier_name]
+      supplier_id: [sellerOpenId, sellerId, shop_id, member_id]
+      location: [province, location, city]
+      years: [tpYear, years, tp_year]
+      verified: [isFactory, is_factory, superFactory]
+      trade_assurance: [tradeAssurance, trade_assurance]
+      rating: [sellerScore, score, goodRate]
+      certifications: [certificateList, certifications]
+      weight_g: [unitWeight, weight]
+  alibaba:
+    label: "Alibaba.com (via data API)"
+    kind: aggregator
+    env: [DIP_ALIBABA_API_KEY, DIP_ALIBABA_API_URL]
+    params: {key: "{key}", q: "{query}", page: "{page}", api_name: item_search}
+    currency: USD
+    fields:
+      items: [items.item, result.items, items, data]
+      id: [num_iid, product_id, id]
+      title: [title, subject]
+      url: [detail_url, url]
+      image: [pic_url, image]
+      price: [price, min_price, promotion_price]
+      price_tiers: [price_range, priceRanges]
+      moq: [min_num, moq, min_order]
+      sold: [sales, orders]
+      supplier: [company_name, seller_nick, shop_name]
+      supplier_id: [seller_id, company_id, shop_id]
+      location: [area, location, country]
+      years: [years, gold_supplier_years]
+      verified: [verified_supplier, is_verified]
+      trade_assurance: [trade_assurance]
+      rating: [rating, score]
+      certifications: [certifications]
+      response_rate: [response_rate]
+  taobao:
+    label: "Taobao / Tmall (via data API)"
+    kind: aggregator
+    env: [DIP_TAOBAO_API_KEY, DIP_TAOBAO_API_URL]
+    params: {key: "{key}", q: "{query}", page: "{page}", api_name: item_search}
+    currency: CNY
+    fields:
+      items: [items.item, items, data]
+      id: [num_iid, id]
+      title: [title]
+      url: [detail_url, url]
+      image: [pic_url]
+      price: [price, promotion_price]
+      sold: [sales]
+      supplier: [seller_nick, shop_name]
+      supplier_id: [seller_id, shop_id]
+      location: [area]
+  aliexpress:
+    label: "AliExpress (official affiliate API)"
+    kind: aliexpress
+    env: [DIP_ALIEXPRESS_APP_KEY, DIP_ALIEXPRESS_APP_SECRET, DIP_ALIEXPRESS_TRACKING_ID]
+    gateway: https://api-sg.aliexpress.com/sync
+    method: aliexpress.affiliate.product.query
+    page_size: 50
+    currency: USD
+    fields:
+      items: [aliexpress_affiliate_product_query_response.resp_result.result.products.product]
+      id: [product_id]
+      title: [product_title]
+      url: [product_detail_url, promotion_link]
+      image: [product_main_image_url]
+      price: [target_sale_price, sale_price]
+      sold: [lastest_volume]
+      supplier: [shop_name, shop_id]
+      supplier_id: [shop_id]
+      rating: [evaluate_rate]
+  made_in_china:
+    label: "Made-in-China.com (via data API)"
+    kind: aggregator
+    env: [DIP_MIC_API_KEY, DIP_MIC_API_URL]
+    params: {key: "{key}", q: "{query}", page: "{page}"}
+    currency: USD
+    fields:
+      items: [products, items, data]
+      id: [id, product_id]
+      title: [title, name]
+      url: [url, detail_url]
+      image: [image]
+      price: [price, min_price]
+      moq: [moq, min_order]
+      supplier: [company, company_name]
+      supplier_id: [company_id]
+      location: [location, province]
+      verified: [audited_supplier, verified]
+      certifications: [certifications]
+      years: [years]
+
+run:
+  pages_per_query: 2
+  max_offers_per_platform: 150
+  budget_usd_per_run: 3.0
+  first_order_months: 3            # first order = expected units/month x this (MOQ fit)
+  default_first_order_qty: 500     # when no launch simulation exists for the concept
+  min_fit: 0.35                    # offers below this relevance are listed as "not a match", never ranked
+  shortlist: 10
+
+# freight and duty come from landed_cost in config/platform/knowledge.yaml; the offer's own weight is used when
+# given, else the market's median package weight, else this
+default_unit_weight_g: 150
+
+# components of the supplier-offer score (0-100 each); missing components are left out and the coverage shown
+weights:
+  fit: 0.30              # how well the offer matches the concept (terms, attributes, configuration)
+  margin: 0.30           # margin left at the target Amazon price after fees, freight, duty and unit cost
+  reliability: 0.20      # years on platform, verification, trade assurance, rating, repeat buyers, sales
+  compliance: 0.10       # certifications the category needs (below)
+  moq_fit: 0.10          # MOQ against the planned first order
+
+# certifications the category's products need to be sold on Amazon US (checked against what the offer states;
+# a missing statement is "verify with the supplier", never a pass)
+compliance:
+  default: []
+  denture_base: [ISO 13485, FDA]
+  dental_models: []
+  implants: [ISO 13485, FDA, CE]
+  micromotor: [CE, FDA]
+
+# words that mean the offer is something else (accessory-only, wrong use); matched in EN and ZH titles
+negative_terms: [toy, 玩具, keychain, 钥匙扣, pet, 宠物, sticker, 贴纸, costume]
+
+# EN <-> ZH glossary for dental sourcing terms (matching Chinese titles against English concept words)
+glossary:
+  denture: [假牙, 义齿]
+  denture base: [义齿基托, 基托]
+  reline: [重衬, 软衬]
+  repair: [修复, 修补]
+  resin: [树脂, 牙托粉]
+  acrylic: [亚克力, 丙烯酸, 牙托粉]
+  wax: [蜡, 基托蜡]
+  kit: [套装, 套件]
+  soft: [软]
+  hard: [硬]
+  teeth: [牙齿, 牙]
+  tooth: [牙齿, 牙]
+  model: [模型]
+  typodont: [牙齿模型, 牙颌模型]
+  removable: [可拆卸, 可拆]
+  impression tray: [印模托盘, 托盘]
+  plaster: [石膏]
+  implant: [种植体, 种植]
+  analog: [替代体]
+  driver: [螺丝刀, 扳手]
+  micromotor: [微型马达, 马达, 打磨机]
+  brushless: [无刷]
+  handpiece: [手机, 手柄]
+  dental: [牙科, 口腔]
+  beads: [珠]
+  temporary: [临时]
+  upper: [上颌]
+  lower: [下颌]

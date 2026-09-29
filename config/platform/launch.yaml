@@ -1,0 +1,28 @@
+# Launch evaluation (Master Prompt 2, phase 3).
+fit_weights:              # market-fit components; unavailable ones are left out and reported
+  demand: 0.25
+  growth: 0.15
+  competition: 0.20
+  price_fit: 0.15
+  customer_pain: 0.10
+  supplier_availability: 0.05
+  differentiation: 0.10
+verdicts: {attractive: 70, moderate: 50}
+risk_penalty: {high: 8, medium: 4}      # points taken off attractiveness per risk
+risks:
+  dominance_high: 0.40                  # top brand share of the segment
+  dominance_medium: 0.25
+  differentiation_high: 0.80            # title/spec similarity to the closest existing product
+  differentiation_medium: 0.65
+  thin_margin: 0.20                     # unit margin / price below this
+  low_coverage: 0.30                    # share of the segment's products with known sales
+positioning: [[0.25, "Budget"], [0.50, "Mid-range"], [0.75, "Mid-premium"], [1.01, "Premium"]]
+economics:
+  marketplace_fee: 0.15                 # referral fee if the request does not give one
+  # source columns (raw attribute names) that carry a unit cost / fulfilment fee for a listing;
+  # medians over the comparables are used when the request gives no cost
+  unit_cost_fields: ["保底生产成本", "unit_cost", "production_cost", "cost"]
+  fulfilment_fee_fields: ["FBA($)", "fba_fee", "fulfilment_fee"]
+bundle_terms: ["kit", "set", "bundle", "combo", "pack", "with"]   # generic commerce words, not category rules
+bundle_lift: 1.3          # top sellers use bundle terms this many times more often than the rest -> recommend
+comparables: 15

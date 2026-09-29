@@ -1,0 +1,87 @@
+# Deterministic keyword signals for the product-type rules layer
+# (src/dmie/classification/product_type_classifier.py::apply_rules).
+#
+# This is NOT the taxonomy itself -- config/taxonomy/denture_base_v1.yaml
+# is frozen (DECISIONS.md "M11 -- Taxonomy v1 frozen") and this file must
+# never change its ids, names, or definitions. This file only maps each
+# already-frozen taxonomy id to the title keywords that count as
+# deterministic evidence for it. Revising a keyword list here does not
+# change the taxonomy or require a new taxonomy version -- it only
+# changes how confidently the rules layer recognizes a match before
+# falling back to AI (PRINCIPLES.md principle 4: deterministic first, AI only
+# for what rules can't resolve).
+#
+# Keyed by category + taxonomy_version, so a future denture_base_v2 (or a
+# different category) gets its own independent signal set, and the
+# classifier never hardcodes `if "resin" in title: DB_RESIN` in Python --
+# it looks up whatever signal list this file currently has for the
+# taxonomy id it's scoring.
+#
+# Each signal word/phrase is matched as a whole word (case-insensitive)
+# against the listing title. A title can score points toward more than
+# one id -- e.g. "acrylic" appears in both denture-base-resin fabrication
+# AND reline-kit titles, since they're the same underlying material
+# chemistry used for different purposes. That is a real, expected
+# ambiguity, not a bug: see product_type_classifier.py's rules-tie
+# handling and docs/classification_guidelines.md's own "known, accepted
+# limitation" precedent for the relevance rules.
+
+denture_base:
+  taxonomy_version: 1
+  signals:
+    DB_RESIN:
+      - resin
+      - acrylic
+    DB_WAX_PLATE:
+      - wax
+      - plate
+      - sheet
+    DB_RELINE:
+      - reline
+      - refit
+      - repair
+      - renewal
+      - adjustment
+
+# dental_models_v1.yaml is status: draft_autonomous, not frozen (see that
+# file's header and DECISIONS.md) -- these signals may need revision once
+# a human reviews the taxonomy itself. Keywords below are grounded in the
+# real 299 RELEVANT listing titles read directly (2026-09-23), chosen to
+# minimize cross-id overlap: e.g. "implant" alone was rejected for
+# DM_IMPLANT_MODEL because it also appears in DM_TYPODONT disease/
+# demonstration titles ("Disease Teeth Model with Dental Implant Bridge"
+# is a typodont-style demo item, not an implant-placement training
+# model) -- sinus/mandible/maxillary/edentulous are specific to the
+# actual implant-placement training models instead.
+dental_models:
+  taxonomy_version: 1
+  signals:
+    DM_TYPODONT:
+      - typodont
+      - typodonts
+      - brushing
+      - flossing
+      - caries
+      - orthodontic
+      - braces
+    DM_IMPLANT_MODEL:
+      - sinus
+      - mandible
+      - maxillary
+      - edentulous
+    DM_MANIKIN:
+      - manikin
+      - mannequin
+      - phantom
+    DM_LAB_SUPPLY:
+      - plaster
+      - gypsum
+      - trimmer
+      - vibrator
+      - oscillator
+      - impression
+    DM_RESIN_MATERIAL:
+      - resin
+      - dlp
+    DM_ACCESSORY:
+      - pole

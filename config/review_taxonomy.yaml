@@ -1,0 +1,20 @@
+# Controlled pain-point taxonomy for review intelligence (Milestone 8).
+# Fixed, cross-category vocabulary — extraction must map every insight
+# into one of these category/subcategory pairs, never invent new ones.
+# See src/dmie/reviews/themes.py::validate_taxonomy_path.
+
+taxonomy:
+  QUALITY: [durability, breakage, material, manufacturing]
+  PERFORMANCE: [effectiveness, speed, accuracy, consistency]
+  COMPATIBILITY: [size, connection, fit, system_compatibility]
+  USABILITY: [installation, instructions, controls, learning_curve]
+  PACKAGING: [damage, missing_parts, protection]
+  VALUE: [price, bundle_value]
+
+# 1-5 scale, stored in review_insights.severity (INTEGER).
+severity_scale:
+  1: "Minor/cosmetic annoyance -- does not affect core function"
+  2: "Mild inconvenience -- workaround exists, product still usable"
+  3: "Moderate functional problem -- noticeably impairs the product's job"
+  4: "Major functional failure -- product mostly fails at its job"
+  5: "Product unusable, or a safety concern"

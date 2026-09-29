@@ -1,0 +1,53 @@
+country,iso2,lat,lon,aliases
+United States,US,39.8,-98.6,usa|us|united states of america|america|美国
+China,CN,35.9,104.2,cn|prc|中国|mainland china
+Hong Kong,HK,22.3,114.2,hk|香港|hong kong sar
+Taiwan,TW,23.7,121.0,tw|台湾
+Japan,JP,36.2,138.3,jp|日本
+South Korea,KR,35.9,127.8,kr|korea|republic of korea|韩国
+India,IN,20.6,79.0,in|印度
+Pakistan,PK,30.4,69.3,pk|巴基斯坦
+Vietnam,VN,14.1,108.3,vn|越南
+Thailand,TH,15.9,101.0,th|泰国
+Malaysia,MY,4.2,102.0,my|马来西亚
+Singapore,SG,1.35,103.8,sg|新加坡
+Indonesia,ID,-0.8,113.9,id|印度尼西亚
+Philippines,PH,12.9,121.8,ph|菲律宾
+Australia,AU,-25.3,133.8,au|澳大利亚
+New Zealand,NZ,-40.9,174.9,nz|新西兰
+Germany,DE,51.2,10.5,de|deutschland|德国
+Switzerland,CH,46.8,8.2,ch|瑞士
+Austria,AT,47.5,14.6,at|奥地利
+Italy,IT,41.9,12.6,it|意大利
+France,FR,46.2,2.2,fr|法国
+Spain,ES,40.5,-3.7,es|西班牙
+Portugal,PT,39.4,-8.2,pt|葡萄牙
+United Kingdom,GB,55.4,-3.4,uk|gb|great britain|england|英国
+Ireland,IE,53.4,-8.2,ie|爱尔兰
+Netherlands,NL,52.1,5.3,nl|holland|荷兰
+Belgium,BE,50.5,4.5,be|比利时
+Sweden,SE,60.1,18.6,se|瑞典
+Denmark,DK,56.3,9.5,dk|丹麦
+Finland,FI,61.9,25.7,fi|芬兰
+Norway,NO,60.5,8.5,no|挪威
+Poland,PL,51.9,19.1,pl|波兰
+Czech Republic,CZ,49.8,15.5,cz|czechia|捷克
+Hungary,HU,47.2,19.5,hu|匈牙利
+Turkey,TR,38.9,35.2,tr|türkiye|土耳其
+Israel,IL,31.0,34.9,il|以色列
+United Arab Emirates,AE,23.4,53.8,ae|uae|阿联酋
+Saudi Arabia,SA,23.9,45.1,sa|沙特阿拉伯
+Egypt,EG,26.8,30.8,eg|埃及
+South Africa,ZA,-30.6,22.9,za|南非
+Nigeria,NG,9.1,8.7,ng|尼日利亚
+Kenya,KE,-0.02,37.9,ke|肯尼亚
+Brazil,BR,-14.2,-51.9,br|巴西
+Mexico,MX,23.6,-102.6,mx|墨西哥
+Canada,CA,56.1,-106.3,ca|加拿大
+Argentina,AR,-38.4,-63.6,ar|阿根廷
+Chile,CL,-35.7,-71.5,cl|智利
+Colombia,CO,4.6,-74.3,co|哥伦比亚
+Peru,PE,-9.2,-75.0,pe|秘鲁
+Russia,RU,61.5,105.3,ru|russian federation|俄罗斯
+Ukraine,UA,48.4,31.2,ua|乌克兰
+Liechtenstein,LI,47.2,9.6,li|列支敦士登

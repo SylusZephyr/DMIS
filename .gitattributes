@@ -1,0 +1,7 @@
+*.bat text eol=crlf
+*.sh text eol=lf
+# The gold benchmark's integrity test (tests/integration/test_classification_pipeline.py)
+# pins the SHA-256 of the file as checked out on Windows (CRLF). Check it out
+# with CRLF on every platform so the check is identical on Linux CI and macOS;
+# the committed blob itself is unchanged.
+data/validated/denture_base/gold_labels.csv text eol=crlf

@@ -1,0 +1,26 @@
+# Operations layer (Master Prompt 3): change detection, scheduler, summaries, notifications, projects.
+changes:
+  opportunity_points: 10.0     # segment opportunity score moved by at least this
+  high_opportunity: 55.0       # crossing this level is always reported
+  share_points: 0.05           # brand share moved by at least 5 percentage points
+  new_brand_share: 0.01        # a new brand is reported from this share
+  price_move: 0.05             # brand median price moved by at least 5 %
+  market_move: 0.10            # market revenue / units moved by at least 10 % -> market.size_change
+  launch_window_days: 120      # a new listing launched within this many days is a "new launch"
+scheduler:
+  inbox_dir: data/inbox        # drop exports into data/inbox/<market>/ ; processed oldest first
+  poll_connectors: true
+  summary_hour: 7              # local hour after which the daily summary is sent (once per day)
+summary:
+  window_hours: 24
+  max_items: 12
+notifications:
+  email_severities: [important]   # alert severities also sent by email (when SMTP is configured)
+  # SMTP: DIP_SMTP_HOST, DIP_SMTP_PORT (587), DIP_SMTP_USER, DIP_SMTP_PASSWORD, DIP_SMTP_FROM
+projects:
+  stages: [opportunity, evaluation, supplier_search, prototype, launch_decision, launched]
+  approval_required_to_enter: launched   # moving into this stage needs projects:admin (manager/admin)
+  outcome_checkpoints_months: [3, 6, 12]
+freshness:                     # how current each market's data is (GET /freshness)
+  stale_after_days: 35         # a monthly export older than this is stale
+  seasonality_periods: 24      # monthly snapshots needed before seasonality can be estimated

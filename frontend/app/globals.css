@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+/* Command-center design tokens. Two complete sets: dark (the historical default) and light. The theme is
+   <html data-theme="light|dark">, set before first paint from the viewer's stored choice or the system
+   preference (lib/theme.ts). Every text token meets WCAG AA (>= 4.5:1) on bg, panel, panel-2 and nav of
+   its own set. Series/magnitude colours live in lib/viz.ts; charts read these tokens at render time. */
+:root, .surface-dark {
+  color-scheme: dark;
+  --bg: #04070d;
+  --panel: #0a1220;
+  --panel-2: #0f1a2d;
+  --nav: #060b14;
+  --line: #1b2a44;
+  --ink: #e6eefb;
+  --ink-2: #9fb3cf;
+  --ink-3: #7f95b8;       /* was #62789a (4.17:1 on panel); now 6.15 panel, 5.72 panel-2 */
+  --accent: #38d6ff;
+  --accent-hover: #6fe3ff;
+  --on-accent: #04121c;
+  --accent-2: #8b7bff;
+  --good: #2ecc8f;
+  --warn: #f5b942;
+  --bad: #ff5d6c;
+  --scrim: rgb(0 0 0 / 0.6);
+  --grid-line: rgba(56, 214, 255, 0.04);
+  --chart-split: rgba(56, 214, 255, 0.06);
+  --glow: 0 0 0 1px rgb(56 214 255 / 0.18), 0 0 24px rgba(56, 214, 255, 0.06);
+  --focus: #38d6ff;
+}
+
+/* light set: ink 18.3 / ink-2 9.7 / ink-3 6.2 on panel; accent 6.6; status colours >= 4.6 on panel-2 */
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f3f6fa;
+  --panel: #ffffff;
+  --panel-2: #eaf0f6;
+  --nav: #f8fafc;
+  --line: #d3dce8;
+  --ink: #0b1526;
+  --ink-2: #34455f;
+  --ink-3: #53627a;
+  --accent: #00628c;
+  --accent-hover: #004f72;
+  --on-accent: #ffffff;
+  --accent-2: #5b45d6;
+  --good: #0b7a50;
+  --warn: #8f5b00;
+  --bad: #c0283a;
+  --scrim: rgb(11 21 38 / 0.45);
+  --grid-line: rgba(0, 98, 140, 0.05);
+  --chart-split: rgba(11, 21, 38, 0.08);
+  --glow: 0 0 0 1px rgb(11 21 38 / 0.06), 0 1px 3px rgb(11 21 38 / 0.06);
+  --focus: #00628c;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-panel: var(--panel);
+  --color-panel-2: var(--panel-2);
+  --color-nav: var(--nav);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-on-accent: var(--on-accent);
+  --color-accent-2: var(--accent-2);
+  --color-good: var(--good);
+  --color-warn: var(--warn);
+  --color-bad: var(--bad);
+  --color-scrim: var(--scrim);
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+html, body { background: var(--bg); color: var(--ink); }
+body { font-family: var(--font-sans); }
+.hud-grid {
+  background-image: linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+.glow { box-shadow: var(--glow); }
+.scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+
+/* Components that still hard-code the dark nav / scrim colours (components/nav.tsx, auth-gate, pilot)
+   follow the theme through these overrides until they switch to bg-nav / bg-scrim. */
+.bg-\[\#060b14\], .bg-\[\#060b14\]\/95 { background-color: var(--nav); }
+.bg-black\/50, .bg-black\/60 { background-color: var(--scrim); }
+
+/* 3D / WebGL viewports keep the dark scene in both themes; their HTML labels use the dark tokens above. */
+.surface-dark { background-color: var(--bg); color: var(--ink); }
+
+/* Visible keyboard focus everywhere (mouse clicks do not show it). */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

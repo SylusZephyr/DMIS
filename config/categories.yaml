@@ -1,0 +1,181 @@
+# Category definitions, keyed by an internal category slug.
+# Referenced by src/dmie/classification/classifier.py to build the
+# {TARGET_CATEGORY} block of the AI relevance prompt — see
+# prompts/relevance_classifier.md. PRINCIPLES.md principle 9: category-specific
+# rules live here, not hardcoded into classifier code.
+#
+# `variant_policy` (see docs/entity_resolution.md "Product Identity Rules"):
+# for each variant dimension, whether differing values within an otherwise
+# same-brand/same-core-item pair make a SEPARATE product or stay ONE product
+# family. This must be set per category — never hardcoded once for all
+# categories. src/dmie/matching/resolution.py currently reads only
+# `pack_quantity` (it's the one dimension with a concrete detector,
+# similarity.py::extract_quantities); other dimensions are documented intent.
+
+categories:
+  denture_base:
+    leaf_category_zh: "义齿基托"
+    leaf_category_en: "denture base"
+    # live acquisition (src/dip/acquire) searches Amazon with these; sourcing searches Chinese marketplaces with the zh terms
+    search_terms: ['denture base resin', 'denture reline kit', 'denture repair kit', 'baseplate wax dental', 'denture acrylic powder liquid', 'soft denture reliner']
+    sourcing_terms_zh: ['义齿基托树脂', '假牙修复套装', '义齿重衬材料', '基托蜡', '自凝牙托粉 牙托水', '软衬材料']
+    parent_category_zh: "义齿"
+    marketplace: "US"
+    description: >
+      The structural base plate of a denture, or material/work that
+      directly becomes or reworks that base plate: base-plate wax,
+      denture base resin/acrylic, and reline/base-repair work where
+      reworking the base is the dominant, primary function of the
+      product.
+
+      Excludes: denture adhesives (bond a denture to gum tissue, not the
+      base material itself), denture-cleaning appliances (used on a
+      finished denture during ordinary use, a separate product family),
+      tooth-replacement or tooth-repair beads/kits (fix individual teeth,
+      not the base plate), generic denture repair kits with no
+      base-specific material, and fabrication accessories/tools used on
+      the base but not the base itself (e.g. polishing burs).
+
+      Boundary cases needing careful judgment, not a keyword match:
+      reline mentioned once alongside competing framing (a general
+      "repair system", "temporary denture kit") or bundled with a
+      separately-named general repair kit; DIY kits that build a full
+      denture (base + teeth) at home; a finished/complete denture product
+      where the base is most of what it is; a mold/forming kit that could
+      be a lab tool or a generic teaching model.
+
+      See docs/classification_guidelines.md for the full reasoning and
+      worked examples (concrete ASINs) behind every distinction above.
+    variant_policy:
+      pack_quantity: separate_products  # a 2-pack bundle is a different
+                                         # commercial SKU from the single
+                                         # unit, even same brand/near-identical
+                                         # title (B00VQTLM74 vs B00E4MPAIW)
+      color: same_product               # color-only variant stays one
+                                         # product family (B0GJTGD6HH vs
+                                         # B0GKB2KPHM)
+      size: same_product                # no evidence yet requiring a
+                                         # different policy for this category
+
+  # Extracted from a real, much broader merged multi-category SellerSprite
+  # export (scripts/extract_from_merged_export.py) -- 428 real raw rows,
+  # not a placeholder. Description/exclusions grounded in a direct review
+  # of every real 小类目 (sub-category) and sample title present in that
+  # extract, the same way denture_base's was (docs/classification_guidelines.md).
+  # This category was chosen specifically because it's heavily
+  # contaminated at the raw sub-category level -- 65% genuine dental
+  # teaching models, the rest real noise (tooth-shaped earrings, dental
+  # wall art, night-lights, pet dental products) -- a real stress test of
+  # the purification pipeline, not a clean hand-picked sample.
+  dental_models:
+    leaf_category_zh: "牙科模型"
+    leaf_category_en: "dental models"
+    # live acquisition (src/dip/acquire) searches Amazon with these; sourcing searches Chinese marketplaces with the zh terms
+    search_terms: ['dental typodont model', 'teeth model removable', 'dental study model', 'dental impression tray', 'dental stone plaster', 'dental model trimmer']
+    sourcing_terms_zh: ['牙科模型 可拆卸', '牙齿模型 教学', '口腔教学模型', '印模托盘', '牙科石膏', '石膏模型修整机']
+    parent_category_zh: "牙科设备"
+    marketplace: "US"
+    description: >
+      Dental teaching/demonstration models (typodonts) used to teach or
+      demonstrate dental anatomy, procedures, or oral hygiene technique,
+      and the lab materials/tools whose direct, primary purpose is
+      fabricating such a model: dental impression trays, dental
+      gypsum/plaster/stone, model-building resin, denture-model-forming
+      materials, and model-finishing tools (vibrators, trimmers, carvers)
+      used specifically in model fabrication.
+
+      Excludes: dental-themed novelty/decor items whose function is
+      decorative or wearable, not educational (tooth-shaped earrings,
+      hair clips, night-lights, paperweights, wall art, jewelry-making
+      wax) even when the raw export's sub-category groups them with real
+      teaching models; pet/veterinary dental products (a different
+      industry from this project's human-dental scope); general oral-care
+      products (toothbrushes, floss) that are merely pictured with or
+      marketed alongside a model rather than being a model themselves;
+      generic children's pretend-play toy sets with no genuine dental-
+      education design intent.
+
+      Boundary cases needing careful judgment, not a keyword match: a
+      "toy" dental kit that is a genuine simplified teaching aid for kids
+      vs. a generic doctor-themed toy that happens to include tooth
+      pieces; an anatomical skull/jaw model marketed for general medical
+      education rather than specifically dental use; 3D-printing resin
+      marketed for "dental models" among several other printable objects.
+    variant_policy:
+      pack_quantity: separate_products  # same reasoning as denture_base
+                                         # -- no category-specific
+                                         # evidence yet overriding it
+      color: same_product
+      size: separate_products  # unlike denture_base: a teaching model's
+                                # size (e.g. "6x enlarged" vs standard) is
+                                # a real functional difference here, not
+                                # a cosmetic variant -- seen directly in
+                                # the raw sample titles ("6 Times Enlarge")
+
+  # Extracted the same way as dental_models -- 279 real raw rows. Chosen
+  # deliberately as the highest-contamination category found: only a
+  # small minority of the raw rows are actual implant devices/tools: most
+  # are general oral-hygiene products (floss threaders, toothbrushes,
+  # toothpicks, ice packs) whose marketing copy merely mentions
+  # "implants" as one of several compatible use cases. A strong, honest
+  # test of whether relevance classification can tell "is about implants"
+  # apart from "is an implant".
+  implants:
+    leaf_category_zh: "种植体"
+    leaf_category_en: "dental implants"
+    # live acquisition (src/dip/acquire) searches Amazon with these; sourcing searches Chinese marketplaces with the zh terms
+    search_terms: ['dental implant model', 'dental implant driver kit', 'implant analog', 'periotome', 'sinus lift kit', 'implant retention cap o-ring']
+    sourcing_terms_zh: ['种植体模型', '种植体扳手 螺丝刀', '种植体替代体', '微创拔牙刀', '上颌窦提升工具', '种植体固位帽 O型圈']
+    parent_category_zh: "牙科设备"
+    marketplace: "US"
+    description: >
+      Dental implant devices/hardware themselves, the surgical
+      instruments whose primary purpose is implant placement (elevators,
+      periotomes, osteotomes), and implant-specific tools/accessories
+      (driver/core tools, retention caps, o-rings sized for a specific
+      implant system).
+
+      Excludes: general oral-hygiene products (floss, floss threaders,
+      toothbrushes, toothpicks, interdental brushes, water flossers,
+      denture cleansers, pain-relief gels/ice packs) whose marketing
+      copy lists "implants" as one of several compatible situations
+      (alongside braces, bridges, dentures) without the product itself
+      being implant-specific hardware or a placement instrument -- the
+      large majority of this category's raw export by row count.
+
+      Boundary cases needing careful judgment, not a keyword match: a
+      dental teaching model that specifically demonstrates implant
+      placement/restoration (relevant, it's implant-specific) vs. a
+      generic dentition model that happens to include an implant among
+      several other conditions shown; a general dental elevator/periotome
+      set marketed for multiple procedures where implant placement is
+      only one listed use.
+    variant_policy:
+      pack_quantity: separate_products
+      color: same_product
+      size: same_product  # no evidence yet requiring a different policy
+
+  # Illustrative example only -- no raw export has been ingested for this
+  # category yet (see PROGRESS.md; confirmed absent from the broader
+  # merged export too -- see the Tier 3 conversation). Included to show
+  # that variant_policy genuinely differs by category: RPM tier is
+  # identity-defining here, unlike denture_base's color variants.
+  micromotor:
+    leaf_category_zh: "微马达"
+    leaf_category_en: "micromotor"
+    # live acquisition (src/dip/acquire) searches Amazon with these; sourcing searches Chinese marketplaces with the zh terms
+    search_terms: ['dental lab micromotor', 'brushless micromotor 50000 rpm', 'micromotor handpiece', 'dental polishing motor']
+    sourcing_terms_zh: ['牙科技工打磨机', '无刷微型马达 50000转', '微型马达手机', '牙科抛光机']
+    parent_category_zh: "牙科设备"
+    marketplace: "US"
+    description: >
+      Dental handpiece/lab micromotor units, brushed or brushless, sold by
+      RPM tier. Placeholder description -- not yet validated against a
+      real raw export the way denture_base's has been.
+    variant_policy:
+      rpm_tier: separate_products  # 35K/40K/50K RPM are different
+                                    # products for market-sizing purposes,
+                                    # not variants of one SKU -- the
+                                    # opposite policy from denture_base's
+                                    # color dimension.
+      color: same_product

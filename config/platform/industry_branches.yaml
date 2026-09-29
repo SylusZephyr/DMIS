@@ -1,0 +1,29 @@
+# Market Universe: top-level branches of the dental industry.
+# A market is assigned to the branch whose prototype phrases its listing
+# titles are most similar to (TF-IDF cosine) -- no product is hardcoded.
+# Extend or re-word freely; add a branch by adding a block.
+industry: Dental Industry
+branches:
+  Consumables:
+    - disposable impression trays alginate gloves bibs cotton rolls
+    - dental floss threaders interdental brushes oral care
+    - denture adhesive cleaner reline repair kit
+    - composite resin bonding etchant fluoride varnish prophy paste
+  Equipment:
+    - dental chair unit compressor suction autoclave sterilizer
+    - ultrasonic scaler curing light apex locator endo motor
+    - dental handpiece micromotor air turbine
+    - water flosser electric toothbrush oral irrigator
+  Digital Dentistry:
+    - intraoral scanner cad cam milling machine 3d printer resin
+    - dental x-ray sensor intraoral camera imaging software
+    - zirconia block digital impression
+  Laboratory:
+    - dental lab micromotor polishing lathe model trimmer
+    - dental stone gypsum plaster wax base plate articulator
+    - denture teeth acrylic resin flask investment casting
+    - typodont teeth model phantom head teaching model
+  Instruments:
+    - dental instruments forceps elevators scalers curettes mirrors probes
+    - burs diamond carbide files osteotome surgical kit
+    - orthodontic pliers brackets wires elastics

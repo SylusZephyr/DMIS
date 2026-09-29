@@ -1,0 +1,14 @@
+.git
+**/__pycache__
+**/*.pyc
+.venv
+venv
+frontend/node_modules
+frontend/.next
+data/platform
+data/lake
+data/bench
+data/inbox
+backups
+database
+*.log

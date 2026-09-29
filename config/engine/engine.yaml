@@ -1,0 +1,85 @@
+# Universal Market Intelligence Engine -- tunable parameters.
+# Every threshold/weight the engine uses lives here (PRINCIPLES.md principle 9).
+
+relevance:
+  domain: dental
+  relevant_threshold: 60      # score >= this -> relevant
+  uncertain_threshold: 40     # [uncertain, relevant) -> review queue
+  use_category_field: true
+  feedback_model: auto        # auto | logistic | xgboost -- model trained on human corrections
+  xgboost_min_labels: 200     # auto switches to XGBoost (if installed) from this many corrections
+
+quality:
+  zscore_threshold: 3.5
+  iqr_multiplier: 3.0
+  isolation_contamination: 0.05
+  rating_range: [0, 5]
+  max_price: 100000
+  max_monthly_sales: 1000000
+  revenue_consistency_tolerance: 0.35   # |revenue - price*sales| / revenue
+  min_confidence_for_market: 40         # records below this are excluded from market math (flagged, not dropped)
+
+discovery:
+  svd_components: 40
+  min_cluster_size: 3
+  eps_quantile: 0.5          # auto-eps: quantile of k-distance curve
+  max_noise_fraction: 0.5    # if DBSCAN leaves more noise than this, fall back to K-Means
+  kmeans_k_range: [2, 12]
+  family_k_range: [2, 6]
+  label_terms: 3
+  merge_similarity: 0.75     # merge segments whose centroids are this similar (cosine)
+
+dedup:
+  match_threshold: 0.72
+  weights:
+    title: 0.45
+    brand: 0.15
+    spec: 0.15
+    price: 0.10
+    image: 0.15
+  price_ratio_limit: 1.6     # prices differing by more than this factor can never match
+  max_block_size: 400
+
+market:
+  months_per_year: 12
+  price_tiers: [0.33, 0.66]  # quantile cut points -> low / middle / premium
+
+forecast:
+  horizon_periods: 12
+  min_periods: 3
+  moving_average_window: 3
+
+opportunity:
+  unverified_demand_cap: 45   # segments with no observed sales can't score above this
+  weights:
+    market_size: 0.20
+    demand_growth: 0.15
+    competition: 0.20
+    price_opportunity: 0.10
+    review_problems: 0.10
+    margin_opportunity: 0.15
+    entry_difficulty: 0.10
+
+simulation:
+  n_simulations: 10000
+  seed: 20260924
+  default_price_elasticity: -1.2
+  comparables: 15
+  success_thresholds:          # probability of positive monthly profit
+    high: 0.7
+    medium: 0.4
+
+suppliers:
+  weights:
+    manufacturer: 0.25
+    oem: 0.15
+    odm: 0.15
+    certifications: 0.25
+    category_match: 0.20
+
+ownership:
+  # Source columns (kept in record attributes) that name the responsible
+  # employee or a human category label -- used to link markets to owners.
+  owner_fields: [产品经理, product_manager, owner, manager, category_owner]
+  category_label_fields: [二级类目, 大类目, 类目, category_label]
+  ownership_csv: data/raw/employee_category_ownership.csv

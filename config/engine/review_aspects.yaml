@@ -1,0 +1,57 @@
+# Module 9 -- Customer pain analysis lexicon (no LLM).
+# aspect -> trigger keywords/phrases + the product-improvement
+# opportunity it implies. Extend per industry; the engine also surfaces
+# unmapped frequent complaint n-grams so new aspects can be discovered.
+
+aspects:
+  overheating:
+    keywords: [overheat, overheats, overheating, hot, heats up, gets hot, too hot, heat]
+    opportunity: Improved cooling / thermal management
+  noise_vibration:
+    keywords: [noisy, noise, loud, vibration, vibrates, vibrating, rattle, wobble]
+    opportunity: Better balancing and quieter bearings
+  durability:
+    keywords: [broke, broken, breaks, cracked, crack, stopped working, died, fell apart, flimsy, lasted, wore out]
+    opportunity: Higher-grade materials and build quality
+  power_performance:
+    keywords: [weak, underpowered, stalls, slow, lacks power, torque, bogs down, not strong]
+    opportunity: Higher torque / more powerful motor
+  fit_compatibility:
+    keywords: [does not fit, doesn't fit, not compatible, wrong size, too small, too big, loose, tight fit]
+    opportunity: Clear compatibility specs and universal fittings
+  usability:
+    keywords: [hard to use, difficult, confusing, instructions, complicated, awkward, uncomfortable, heavy]
+    opportunity: Ergonomic design and clearer instructions
+  quality_control:
+    keywords: [defective, doa, missing parts, missing, damaged, used, scratched, wrong item]
+    opportunity: Stronger QC and packaging
+  value_price:
+    keywords: [overpriced, expensive, not worth, waste of money, cheap quality, price]
+    opportunity: Better value tier / bundle
+  battery_power_supply:
+    keywords: [battery, charge, charging, cord, cable, power supply, adapter]
+    opportunity: Better battery / power supply design
+  smell_taste_material:
+    keywords: [smell, odor, taste, toxic, chemical, sticky, messy]
+    opportunity: Safer, odorless materials
+
+# Patterns that signal a missing feature request.
+missing_feature_patterns:
+  - "wish it had ([a-z ]{3,30})"
+  - "wish there was ([a-z ]{3,30})"
+  - "would be nice if ([a-z ]{3,40})"
+  - "needs (?:a|an) ([a-z ]{3,30})"
+  - "no ([a-z]{3,20}) (?:included|option|setting)"
+  - "doesn'?t (?:have|come with) (?:a|an)? ?([a-z ]{3,30})"
+
+# Small general-purpose sentiment lexicon (weights -3..+3). Negation
+# ("not", "never", "no", "n't") within 3 tokens flips polarity.
+sentiment:
+  positive: {great: 2, excellent: 3, perfect: 3, love: 3, loved: 3, good: 1.5, works: 1, sturdy: 2, durable: 2,
+             easy: 1.5, quiet: 1.5, powerful: 2, smooth: 1.5, recommend: 2, reliable: 2, happy: 2, best: 2,
+             comfortable: 1.5, accurate: 1.5, fast: 1, strong: 1.5, quality: 1, nice: 1.5, worth: 1.5, solid: 1.5}
+  negative: {bad: -2, terrible: -3, awful: -3, poor: -2, broke: -2.5, broken: -2.5, defective: -3, useless: -3,
+             disappointed: -2, disappointing: -2, cheap: -1.5, flimsy: -2, noisy: -1.5, loud: -1, weak: -1.5,
+             overheats: -2.5, overheat: -2, hot: -1, stopped: -2, returned: -2, return: -1, refund: -2,
+             waste: -2.5, junk: -3, worst: -3, fails: -2.5, failed: -2.5, leaks: -2, leaking: -2, wobble: -1.5,
+             difficult: -1.5, hard: -0.5, missing: -1.5, damaged: -2, uncomfortable: -1.5, slow: -1}

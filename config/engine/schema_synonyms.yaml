@@ -1,0 +1,41 @@
+# Module 1 -- Universal schema detection.
+# Header synonyms per universal MarketRecord field. Matching is
+# case-insensitive after stripping punctuation/units, and is combined with
+# value profiling in src/dmie/engine/ingestion/schema_detector.py -- a
+# header that is not listed here can still be detected from its values.
+# Add synonyms here (never in code) when onboarding a new source.
+
+# Parent-level (variation family) columns. On an export with one row per child ASIN a parent's total repeats
+# on every child row, so using it as the listing's id / sales / revenue would count the family once per child.
+# They fill those fields only when the file has no child-level column for them (then with a warning), and are
+# otherwise kept as attributes.
+parent_level:
+  id:      [parent asin, parent id, 父asin, 父体asin]
+  sales:   [parent sales, parent units, parent monthly sales, 父体销量, 父体月销量]
+  revenue: [parent revenue, parent sales revenue, parent monthly revenue, 父体销售额, 父体月销售额]
+
+fields:
+  id:        [asin, sku, id, item id, product id, listing id, 子asin, 商品id, 编号]
+  title:     [title, product title, name, product name, item name, listing title, 商品标题, 标题, 产品名称, 名称]
+  brand:     [brand, brand name, manufacturer, maker, 品牌, 品牌名]
+  price:     [price, price usd, sale price, current price, list price, unit price, buy box price, 价格, 售价, 单价]
+  sales:     [sales, units, monthly sales, units sold, monthly units, sales volume, qty sold, 子体销量, 月销量, 销量]
+  revenue:   [revenue, sales revenue, monthly revenue, gmv, turnover, 子体销售额, 月销售额, 销售额]
+  rating:    [rating, stars, star rating, avg rating, average rating, review rating, 评分, 星级]
+  reviews:   [reviews, review count, ratings, rating count, number of reviews, ratings total, 评论数, 评分数, review数]
+  # Best-sellers rank (the sub-category rank is preferred: it is the one sales are compared within).
+  bsr:       [bsr, sub category bsr, subcategory bsr, category bsr, best sellers rank, sales rank, rank, 小类bsr, 小类排名,
+              大类bsr, 大类排名, bsr排名, 排名]
+  image:     [image, image url, main image, img, picture, thumbnail, 商品主图, 主图, 图片]
+  category:  [category, subcategory, sub category, node, browse node, department, 小类目, 二级类目, 类目, 大类目]
+  seller:    [seller, seller name, merchant, store, shop, vendor, sold by, 卖家, 店铺, 卖家名称]
+  timestamp: [date, timestamp, snapshot date, time, month, period, crawl date, 日期, 时间, 月份, 快照日期]
+  # When the listing went live (NOT the observation time -- a listing date
+  # must never be mistaken for a time series).
+  launch_date: [launch date, date first available, first available, listing date, created, 上架时间, 上架日期]
+  url:       [url, link, product url, detail page, 商品详情页链接, 链接]
+  description: [description, bullet points, bullets, features, about, 描述, 五点描述]
+  review_text: [review text, review, review body, comment, 评论内容, 评论]
+
+# Columns kept as `attributes` even though they have no universal slot.
+# Anything not mapped is kept automatically; this list is informational.
