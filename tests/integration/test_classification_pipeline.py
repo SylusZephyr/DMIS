@@ -14,7 +14,9 @@ from dmie.database.connection import PROJECT_ROOT, get_connection
 from dmie.database.repository import upsert_listing_classifications
 
 SCHEMA_PATH = PROJECT_ROOT / "src" / "dmie" / "database" / "schema.sql"
-GOLD_SHA256_BEFORE = "ae37abc12d3bce090d5be74bae3c2a5205ee51fd1f4bd2129cf692f2c308ba6e"
+# SHA-256 of the gold file as checked out (CRLF, see .gitattributes). Re-pinned once after the
+# reviewer metadata columns were renamed (reviewer, review_status); every label column is unchanged.
+GOLD_SHA256_BEFORE = "792305a81113a1a0676dabe93d0b5e84cdecab1de1daef6e113cca7bf0bd9661"
 
 
 @pytest.fixture(scope="module")
