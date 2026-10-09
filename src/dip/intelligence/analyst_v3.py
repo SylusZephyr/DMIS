@@ -29,6 +29,10 @@ INTENTS = [   # first match wins
     ("launch", r"\b(launch\b|what happens if|what if|if we sell|at \$\d)|上市|如果.*(卖|定价|价格)"),
     ("compare", r"\b(compare|versus|vs\.?|difference between)\b|比较|对比"),
     ("why", r"\b(why|explain|how is .* (calculated|computed))\b|为什么|如何计算"),
+    ("quality", r"\b(trust\w*|reliab\w*|accura\w*|data quality|validat\w*|integrity|can i believe)\b|可信|准确|可靠|数据质量|验证"),
+    ("suppliers", r"\b(suppliers?|sourc\w*|manufacturers?|factor(y|ies)|oem|odm|vendors?)\b|供应商|工厂|采购|货源"),
+    ("pain", r"\b(complain\w*|pain points?|customers? (want|dislike|hate|complain)|negative reviews?|bad reviews?|review themes?)\b|投诉|痛点|差评|抱怨"),
+    ("types", r"\b(product types?|types of|kinds of|taxonomy|sub-?types?|what (is|gets) sold)\b|产品类型|品类|分类|类型"),
     ("recommend", r"\b(what should (we|i) (sell|make|build|launch)|recommend\w*|best product|which product)\b|卖什么|推荐|应该(做|卖|开发)"),
     ("competitors", r"\b(competitors?|competition|brands?|rivals?|market share|leaders?|who (leads|dominates))\b|竞争|品牌|对手|份额|领导|领先|龙头|头部"),
     ("entry", r"\b(entr\w+|enter\w*|newcomer|new listing|barrier|hard to enter|difficult)\b|进入|新品|门槛|难度"),
@@ -507,8 +511,115 @@ def unsupported_numbers(reply: str, facts: list[Fact]) -> list[float]:
 
 
 # ------------------------------------------------------------------ entry point
+def t_pain(markets: list[str], n: int) -> list[Fact]:
+    """What customers complain about, from the review analysis (pain table). Without review text it says so."""
+    out = []
+    for m in markets:
+        if not lake.has_curated("pain", m):
+            continue
+        d = lake.read_curated("pain", m)
+        row = d[d["scope"] == "__market__"] if len(d) else d
+        if not len(row):
+            continue
+        p = row.iloc[0]["payload"]
+        p = json.loads(p) if isinstance(p, str) else dict(p)
+        if not p.get("reviews"):
+            out.append(Fact(f"{m}: no review text has been uploaded, so customer complaints are not measured; ratings stand in "
+                            "where a complaint signal is needed (upload reviews on the datasets page).",
+                            f"{m}：尚未上传评论文本，因此无法衡量客户投诉；需要时以评分作为替代（请在数据集页面上传评论）。",
+                            f"/api/v2/markets/{m}/pain", []))
+            continue
+        out.append(Fact(f"{m}: {int(p['reviews'])} reviews analysed; average sentiment {(_f(p.get('avg_sentiment')) or 0):+.2f}.",
+                        f"{m}：分析了 {int(p['reviews'])} 条评论；平均情感 {(_f(p.get('avg_sentiment')) or 0):+.2f}。",
+                        f"/api/v2/markets/{m}/pain", [p["reviews"], _f(p.get("avg_sentiment")) or 0]))
+        for c in (p.get("complaints") or [])[:n]:
+            out.append(Fact(f"{m}: complaint '{c['aspect']}' in {int(c['mentions'])} reviews ({_p(c['share_of_reviews'])}), "
+                            f"sentiment {c['avg_sentiment']:+.2f}; e.g. \"{str(c.get('example', ''))[:120]}\"",
+                            f"{m}：投诉“{c['aspect']}”出现在 {int(c['mentions'])} 条评论中（{_p(c['share_of_reviews'])}），"
+                            f"情感 {c['avg_sentiment']:+.2f}；例如：“{str(c.get('example', ''))[:120]}”",
+                            f"/api/v2/markets/{m}/pain", [c["mentions"], c["share_of_reviews"], c["avg_sentiment"]]))
+        missing = p.get("missing_features") or []
+        if missing:
+            names = ", ".join(str(x.get("feature", x)) if isinstance(x, dict) else str(x) for x in missing[:n])
+            out.append(Fact(f"{m}: features customers ask for that listings lack: {names}.",
+                            f"{m}：客户提到但现有商品缺少的功能：{names}。", f"/api/v2/markets/{m}/pain", []))
+    return out
+
+
+def t_types(markets: list[str], n: int) -> list[Fact]:
+    """Product types discovered in the data (taxonomy nodes): products, listings, modelled revenue and price."""
+    out = []
+    for m in markets:
+        if not lake.has_curated("taxonomy_nodes", m):
+            continue
+        t = lake.read_curated("taxonomy_nodes", m)
+        if not len(t):
+            continue
+        from dip.knowledge import taxonomy_discovery as tax
+        dec = tax.load_decisions(m)          # reviewer renames since the last run, as the taxonomy page shows them
+        if len(dec):
+            latest = dec.drop_duplicates("node_key", keep="last").set_index("node_key")
+            st = t["node_key"].map(latest["decision"])
+            t["approved_label"] = t["node_key"].map(latest["label"]).where(st.isin(["renamed", "approved"]), t["approved_label"])
+        t = t.sort_values("revenue_est", ascending=False, na_position="last")
+        dims = sorted(set(t["dimension"].dropna().astype(str)))
+        out.append(Fact(f"{m}: products split into {len(t)} types along {', '.join(dims)}.",
+                        f"{m}：产品按 {', '.join(dims)} 分为 {len(t)} 个类型。", f"/api/v2/markets/{m}/taxonomy", [len(t)]))
+        for _, r in t.head(n).iterrows():
+            label = r.get("approved_label") if isinstance(r.get("approved_label"), str) and r.get("approved_label") else r["label"]
+            rev, lo, hi, pr = (_f(r.get(k)) for k in ("revenue_est", "revenue_lo", "revenue_hi", "price_median"))
+            out.append(Fact(f"{m} · {label}: {int(r['products'])} products ({int(r['listings'])} listings), modelled revenue "
+                            f"{_m(rev)}/month ({_m(lo)}–{_m(hi)}), median price {_m(pr)}.",
+                            f"{m} · {label}：{int(r['products'])} 个产品（{int(r['listings'])} 个链接），模型月销售额 {_m(rev)}"
+                            f"（{_m(lo)}–{_m(hi)}），价格中位数 {_m(pr)}。",
+                            f"/api/v2/markets/{m}/taxonomy", [x for x in (r["products"], r["listings"], rev, lo, hi, pr) if x is not None]))
+    return out
+
+
+def t_suppliers(markets: list[str], n: int) -> list[Fact]:
+    """Suppliers ranked for the market's segments (fit, cooperation history, price level), from the supplier database."""
+    from dip import sourcing
+
+    out = []
+    for m in (markets or [None])[:2]:
+        rows = sourcing.ranking(None, m, limit=n)
+        where = m or "all markets"
+        if not rows:
+            out.append(Fact(f"{where}: no suppliers on file match yet; add suppliers on the suppliers page or run sourcing search.",
+                            f"{where}：暂无匹配的供应商；请在供应商页面添加或运行货源搜索。", "/api/v2/sourcing/ranking", []))
+            continue
+        for r in rows:
+            extra = ", ".join(x for x in (r.get("country"), "OEM" if r.get("oem") else None, "ODM" if r.get("odm") else None) if x)
+            out.append(Fact(f"{where}: #{r['rank']} {r['name']} ({extra or 'details not recorded'}), rank score {r['rank_score']:.0f}/100"
+                            + (f"; missing evidence: {', '.join(r['missing'])}" if r.get("missing") else "") + ".",
+                            f"{where}：第 {r['rank']} 名 {r['name']}（{extra or '未记录详情'}），排名得分 {r['rank_score']:.0f}/100"
+                            + (f"；缺少证据：{', '.join(r['missing'])}" if r.get("missing") else "") + "。",
+                            "/api/v2/sourcing/ranking", [r["rank"], r["rank_score"]]))
+    return out
+
+
+def t_quality(markets: list[str]) -> list[Fact]:
+    """Whether the market's numbers can be trusted: the integrity checks (passed / warnings / failures, with reasons)."""
+    from dip.metrics import integrity
+
+    out = []
+    for m in markets:
+        rep = integrity.check_market(m)
+        counts = rep.get("counts") or {}
+        out.append(Fact(f"{m}: number checks {counts.get('pass', 0)} passed, {counts.get('warn', 0)} warnings, "
+                        f"{counts.get('fail', 0)} failed.",
+                        f"{m}：数字校验 {counts.get('pass', 0)} 项通过，{counts.get('warn', 0)} 项警告，{counts.get('fail', 0)} 项失败。",
+                        f"/api/v2/markets/{m}/integrity", [counts.get("pass", 0), counts.get("warn", 0), counts.get("fail", 0)]))
+        for c in rep.get("checks", []):
+            if c["status"] in ("fail", "warn"):
+                word, zh = ("Failed", "失败") if c["status"] == "fail" else ("Warning", "警告")
+                out.append(Fact(f"{m}: {word} - {c['id'].replace('_', ' ')}: {c['detail']}",
+                                f"{m}：{zh} - {c['id']}：{c['detail']}", f"/api/v2/markets/{m}/integrity", []))
+    return out
+
+
 # answers built on the demand model's estimates (the size answer flags validation in its own fact)
-MODEL_BASED_INTENTS = {"opportunity", "recommend", "competitors", "entry", "launch", "compare", "why", "overview"}
+MODEL_BASED_INTENTS = {"opportunity", "recommend", "competitors", "entry", "launch", "compare", "why", "overview", "types"}
 
 
 def model_caveat(markets: list[str]) -> list[Fact]:
@@ -544,6 +655,10 @@ def ask(question: str, visible: list[str], use_ai: bool = False, lang: str = "en
         "compare": lambda: t_size(markets) + (t_engine(markets, 1) or t_opportunity(markets, 1)),
         "why": lambda: (t_engine(markets, 1, sc.segments) + [METHOD_FACT]) if t_engine(markets, 1, sc.segments) else t_why(markets, sc.segments),
         "overview": lambda: t_size(markets) + (t_engine(markets, 2) or t_opportunity(markets, 2)) + t_recommend(markets),
+        "pain": lambda: t_pain(markets, n),
+        "types": lambda: t_types(markets, n),
+        "suppliers": lambda: t_suppliers(markets, n),
+        "quality": lambda: t_quality(markets),
     }
     facts = tools[intent]()
     if facts and intent in MODEL_BASED_INTENTS:
@@ -569,6 +684,10 @@ FOLLOWUPS = {
     "growth": ["Which segment has the best opportunity?"],
     "launch": ["Who are the competitors?", "What should we sell?"],
     "overview": ["What should we sell?", "Who are the competitors?", "How big is the market?"],
+    "pain": ["What should we sell?", "Which product types sell most?"],
+    "types": ["What do customers complain about?", "Which segment has the best opportunity?"],
+    "suppliers": ["What should we sell?", "What happens if we launch it at $15 with cost $4?"],
+    "quality": ["How big is the market?", "Why is the score this way?"],
 }
 FOLLOWUPS_ZH = {
     "size": ["哪个细分机会最好？", "谁在领导这个市场？"],
@@ -579,6 +698,10 @@ FOLLOWUPS_ZH = {
     "growth": ["哪个细分机会最好？"],
     "launch": ["竞争对手有哪些？", "我们应该卖什么？"],
     "overview": ["我们应该卖什么？", "竞争对手有哪些？", "市场有多大？"],
+    "pain": ["我们应该卖什么？", "哪些产品类型卖得最好？"],
+    "types": ["客户投诉什么？", "哪个细分机会最好？"],
+    "suppliers": ["我们应该卖什么？", "如果以 $15 上市、成本 $4 会怎样？"],
+    "quality": ["市场有多大？", "为什么是这个分数？"],
 }
 
 SYSTEM = ("You are a senior e-commerce market analyst. You explain computed facts to a product manager. "

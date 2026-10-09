@@ -615,10 +615,36 @@ def test_analyst_caveat_when_the_demand_model_is_not_validated(api, monkeypatch)
     ("Who leads this market?", "competitors"), ("谁在领导这个市场？", "competitors"), ("Are launches speeding up?", "growth"),
     ("上新在加速吗？", "growth"), ("What happens if we launch it at $20?", "launch"), ("如果以 $20 上市会怎样？", "launch"),
     ("Why is the score 55?", "why"), ("为什么是这个分数？", "why"), ("How hard is it to enter?", "entry"), ("进入难度如何？", "entry"),
+    ("What do customers complain about?", "pain"), ("客户投诉什么？", "pain"), ("Which product types sell most?", "types"),
+    ("哪些产品类型卖得最好？", "types"), ("Who are the suppliers?", "suppliers"), ("有哪些供应商？", "suppliers"),
+    ("Can I trust these numbers?", "quality"), ("这些数据可信吗？", "quality"),
 ])
 def test_analyst_intents_bilingual(q, intent):
     from dip.intelligence.analyst_v3 import intent_of
     assert intent_of(q) == intent
+
+
+def test_analyst_answers_from_the_knowledge_tables(api):
+    """Complaints, product types, suppliers and number checks are answered from their own tables, with sources,
+    and every followup the analyst suggests routes back to an intent it can answer."""
+    from dip.intelligence.analyst_v3 import FOLLOWUPS, FOLLOWUPS_ZH, intent_of
+
+    pain = api.post("/api/v2/analyst/ask-v3", json={"question": "What do customers complain about in mm?"}).json()
+    assert pain["intent"] == "pain" and pain["facts"]
+    assert all(f["source"] == "/api/v2/markets/mm/pain" for f in pain["facts"])
+    types = api.post("/api/v2/analyst/ask-v3", json={"question": "Which product types sell in mm?"}).json()
+    assert types["intent"] == "types" and "/api/v2/markets/mm/taxonomy" in types["sources"]
+    tax = api.get("/api/v2/markets/mm/taxonomy").json()
+    assert f"split into {len(tax['nodes'])} types" in types["facts"][0]["text"]
+    sup = api.post("/api/v2/analyst/ask-v3", json={"question": "Who are the suppliers for mm?"}).json()
+    assert sup["intent"] == "suppliers" and sup["facts"] and sup["sources"] == ["/api/v2/sourcing/ranking"]
+    q = api.post("/api/v2/analyst/ask-v3", json={"question": "Can I trust the numbers for mm?", "lang": "zh"}).json()
+    integ = api.get("/api/v2/markets/mm/integrity").json()
+    c = integ["counts"]
+    assert q["intent"] == "quality" and f"{c.get('pass', 0)} 项通过" in q["facts"][0]["text"]
+    assert len(q["facts"]) == 1 + sum(ch["status"] in ("fail", "warn") for ch in integ["checks"])
+    for fu in [x for v in FOLLOWUPS.values() for x in v] + [x for v in FOLLOWUPS_ZH.values() for x in v]:
+        assert intent_of(fu) != "overview", fu
 
 
 # ---------------------------------------------------------------- Phase 8 significant changes only
