@@ -10,9 +10,37 @@ DMIS runs in three shapes. All three use the same code and the same `scripts/dmi
 
 ## 1. Production compose
 
+**One command** on a server with Docker (compose plugin) and python3, with the domain's DNS pointing at it and
+ports 80/443 open:
+
 ```bash
-cp infra/prod.env.example infra/prod.env        # never commit prod.env
-# edit: DMIS_DOMAIN, POSTGRES_PASSWORD, NEO4J_PASSWORD, optional ANTHROPIC_API_KEY and SMTP
+python3 scripts/deploy.py up --domain dmis.yourcompany.com --admin-email you@yourcompany.com
+```
+
+It writes `infra/prod.env` with generated database passwords (when the file does not exist yet), runs the
+pre-flight check, builds and starts the stack, waits for the API to report healthy, creates the first admin and
+prints the admin's API token once. Run it again after `git pull` to upgrade: an existing `prod.env` is kept.
+
+The **pre-flight check** (`python3 scripts/deploy.py check`, also run by `up`) refuses to start when:
+
+- `infra/prod.env` is missing, or tracked by git;
+- `DMIS_DOMAIN` is empty, not a bare domain name, `localhost` or an example domain (`--allow-localhost` accepts
+  `localhost` for a one-machine trial; Caddy then uses its local certificate authority);
+- `POSTGRES_PASSWORD` / `NEO4J_PASSWORD` are missing, the shipped defaults, shorter than 16 characters, contain
+  characters that break the compose file, or are the same;
+- `DIP_AUTH` is off, or `DIP_CORS_ORIGINS` contains `*`;
+- `DMIS_WEB` names an unknown frontend, or docker compose is not installed.
+
+It warns, without stopping, when no AI provider key or no complete SMTP setting is present.
+
+`DMIS_WEB` picks the command center that is built: `frontend-v2` (default) or `frontend`.
+
+**By hand** (same result):
+
+```bash
+cp infra/prod.env.example infra/prod.env        # never commit prod.env (it is git-ignored)
+# edit: DMIS_DOMAIN, POSTGRES_PASSWORD, NEO4J_PASSWORD, optional ANTHROPIC_API_KEY / GEMINI_API_KEY and SMTP
+python3 scripts/deploy.py check
 docker compose -f infra/docker-compose.prod.yml --env-file infra/prod.env up -d --build
 docker compose -f infra/docker-compose.prod.yml exec api \
   python scripts/dmis.py create-user admin@company.com "Admin" --role admin

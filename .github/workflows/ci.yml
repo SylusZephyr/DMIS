@@ -258,5 +258,16 @@ jobs:
     needs: [python]
     steps:
       - uses: actions/checkout@v4
+      - name: Deploy pre-flight accepts a generated env file and refuses the shipped example
+        run: |
+          python3 scripts/deploy.py init --domain dmis.ci-check.dev
+          python3 scripts/deploy.py check
+          cp infra/prod.env.example infra/prod.env
+          if python3 scripts/deploy.py check; then echo "the example env file must be refused"; exit 1; fi
+          rm infra/prod.env
       - name: Smoke test (postgres, redis, neo4j, qdrant, api x2 workers, queue worker)
         run: scripts/smoke_docker.sh
+      - name: Build the web images (frontend-v2 is the default DMIS_WEB, frontend the alternative)
+        run: |
+          docker build -t dmis-web-v2 --build-arg DIP_API_URL=http://api:8000 frontend-v2
+          docker build -t dmis-web --build-arg DIP_API_URL=http://api:8000 frontend

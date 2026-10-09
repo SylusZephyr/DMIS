@@ -1,7 +1,7 @@
 # Spec coverage — AI-Powered Global Dental Product Intelligence & Supply Chain Discovery Platform
 
-Status of every section of the master specification (v1.0) against this repository, as of the knowledge-layer
-branch. **Built** = implemented and tested. **Partial** = the mechanism exists, a named piece is missing.
+Status of every section of the master specification (v1.0) against this repository, as of the
+current main branch. **Built** = implemented and tested. **Partial** = the mechanism exists, a named piece is missing.
 **Needs data** = built or ready, but blocked on inputs outside the code. **Not built** = not started.
 
 The platform was extended, not rewritten: the spec's own rules (§86 "do not introduce a graph database merely
@@ -36,7 +36,7 @@ because...", §171 build order) and PRINCIPLES.md principle 12 favour evolving t
 | 43–45, 160–163 | Shopping mode, comparison | Built | `/shop` recommender (need words, Pareto, explanations), `/compare`; requirement extraction from the need (attributes with ≥ / ≤ / ≈, budget, stars) filters products that contradict a requirement and keeps those that do not state it |
 | 46–49 | PM mode, ownership, history | Built | ownership with history, portfolio, alerts per owner |
 | 50–56, 158 | Global supplier discovery | Not built | needs a search API and a legal/terms review of sources (§91) |
-| 57–61, 125 | Grounded analyst agent | Built / partial | analyst v3 with tools and a number guard; not yet reading the new knowledge tables |
+| 57–61, 125 | Grounded analyst agent | Built | analyst v3 with tools and a number guard; answers size, opportunity, competitors, entry, economics, growth, launch, customer complaints (review pain), product types (taxonomy), suppliers (sourcing ranking) and "can I trust these numbers" (integrity checks), in English and Chinese, every fact with its API source |
 | 62–63 | Connector framework, normalized record | Built | connector registry, universal record format |
 | 64–66 | Import, AI column mapping, data quality | Built | `/imports/preview`, `/import` wizard, mapping override |
 | 67 | Unit normalization | Built | `knowledge/units.py` |
@@ -45,7 +45,7 @@ because...", §171 build order) and PRINCIPLES.md principle 12 favour evolving t
 | 74 | Opportunity lifecycle | Built | status from the linked project stage |
 | 75–78, 157, 159 | Product development workspace, requirements generator | Built | projects pipeline, launch simulator, decision memo; requirements brief per segment / taxonomy node (`/markets/{m}/requirements`, JSON or Markdown): price band, must-have attributes, differentiators, configuration, pain to fix, sourcing ceiling, compliance, evidence |
 | 86–87 | Knowledge graph, vector search | Built | embedded graph (Neo4j optional), Qdrant local (server optional) |
-| 88 | Multilingual | Partial | EN/ZH interface, original text preserved; machine translation of text not built |
+| 88 | Multilingual | Built / needs key | EN/ZH interface, original text preserved; `knowledge/translate.py` + `POST /translate` + Translate on the product page: English ↔ Chinese machine translation, labelled as machine output, traced, cached by input hash, checked (target script, every number kept) and capped per request and per day; reports `unavailable` without an AI key |
 | 89–90 | Dental terminology, application ontology | Built | `config/platform/knowledge.yaml` |
 | 91–93 | Lawful acquisition, SellerSprite as estimate | Built | SellerSprite values are kind *estimated* everywhere |
 | 94–96 | Human-in-the-loop, feedback | Built | review queues (duplicates, taxonomy, relevance), scope decisions, labelling; decisions feed evaluation |
@@ -60,8 +60,8 @@ because...", §171 build order) and PRINCIPLES.md principle 12 favour evolving t
 ## Next build steps (in order)
 
 1. Run the micromotor vertical on a real export (§135) and tune `attribute_schemas.micromotor`.
-2. Supply an `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` to run the LLM tier; add taxonomy-node naming on the same tier (§128–129).
+2. Supply an `ANTHROPIC_API_KEY` or `GEMINI_API_KEY` to run the LLM tier and machine translation; add taxonomy-node naming on the same tier (§128–129).
 3. Upload real review text with a dataset (§27–30); the requirements brief then lists the real complaints to fix (§77).
 4. Offline evidence: the loader and score are built (`knowledge/offline.py`, `/markets/{m}/offline-evidence`); collect real exhibition, distributor and trade-data rows (§31–33).
-5. Supplier discovery from permitted sources, with capability evidence (§50–56).
+5. Supplier discovery from permitted sources, with capability evidence (§50–56): needs a search API account and a legal review of each source's terms before any code collects from it.
 6. Set `currency.rates_to_usd` (with `rates_as_of`) before uploading a non-US marketplace (§68).

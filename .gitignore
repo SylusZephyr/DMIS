@@ -5,6 +5,8 @@
 .env
 .env.*
 !.env.example
+# production settings and secrets (scripts/deploy.py init writes it)
+infra/prod.env
 
 # --- Python ---
 __pycache__/

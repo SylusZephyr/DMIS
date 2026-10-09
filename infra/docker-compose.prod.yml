@@ -1,5 +1,9 @@
 # Production deployment: company workstation/server (LOCAL MODE) or a cloud VM (SaaS mode).
+# One command (writes infra/prod.env with generated secrets, checks it, builds, starts, creates the first admin):
+#   python3 scripts/deploy.py up --domain dmis.example.com --admin-email you@example.com
+# By hand:
 #   cp infra/prod.env.example infra/prod.env   # edit passwords, domain, SMTP
+#   python3 scripts/deploy.py check            # refuses default passwords, a wildcard CORS origin, auth off, ...
 #   docker compose -f infra/docker-compose.prod.yml --env-file infra/prod.env up -d --build
 #   docker compose -f infra/docker-compose.prod.yml exec api python scripts/dmis.py create-user admin@co.com Admin --role admin
 # Caddy terminates HTTPS (automatic certificates for DMIS_DOMAIN; `localhost` uses a local CA).
@@ -76,7 +80,9 @@ services:
     command: ["python", "scripts/dmis.py", "schedule", "--every-minutes", "60"]
     healthcheck: { disable: true }
   web:
-    build: { context: ../frontend, args: { DIP_API_URL: "http://api:8000" } }
+    # DMIS_WEB picks the command center: frontend-v2 (default) or frontend (the first dashboard)
+    build: { context: "../${DMIS_WEB:-frontend-v2}", args: { DIP_API_URL: "http://api:8000" } }
+    command: ["npx", "next", "start", "-p", "3000"]
     restart: unless-stopped
     depends_on: [api]
   caddy:

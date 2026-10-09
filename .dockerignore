@@ -5,6 +5,9 @@
 venv
 frontend/node_modules
 frontend/.next
+frontend-v2/node_modules
+frontend-v2/.next
+infra/prod.env
 data/platform
 data/lake
 data/bench

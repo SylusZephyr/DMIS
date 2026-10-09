@@ -4,6 +4,7 @@ WORKDIR /web
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
+RUN mkdir -p public            # static assets folder (the app has none yet; next start expects it)
 ARG DIP_API_URL=http://api:8000
 ARG NEXT_PUBLIC_MAPBOX_TOKEN=
 ENV DIP_API_URL=$DIP_API_URL NEXT_PUBLIC_MAPBOX_TOKEN=$NEXT_PUBLIC_MAPBOX_TOKEN NEXT_TELEMETRY_DISABLED=1
