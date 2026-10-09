@@ -313,3 +313,14 @@ test("market page shows the number-integrity check with what failed", async ({ p
     await expect(card.getByText(en.integ.check[issues[0].id as keyof typeof en.integ.check], { exact: true })).toBeVisible();
   }
 });
+
+test("product page translates the listing title into the interface language, labelled as machine output", async ({ page, request }) => {
+  const [market] = await marketNames(request);
+  const prods = await (await request.get(`/api/v2/markets/${encodeURIComponent(market)}/products?limit=1&sort=revenue`)).json();
+  const id = (prods.items as { product_id: string }[])[0].product_id;
+  await page.goto(`/products/${encodeURIComponent(id)}`);
+  await page.getByRole("group", { name: en.a11y.language }).first().getByRole("button", { name: "中文" }).click();
+  await page.getByRole("button", { name: zh.translate.button, exact: true }).click();
+  // without an AI key on the server the page says so; with one it shows the labelled translation
+  await expect(page.getByText(zh.translate.status.unavailable).or(page.getByText(zh.translate.machine))).toBeVisible();
+});
