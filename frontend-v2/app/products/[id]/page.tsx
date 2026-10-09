@@ -16,6 +16,7 @@ import { type Position, PositionCard } from "@/components/product-position";
 import { useMarketName } from "@/lib/market-name";
 import { ModelFlag } from "@/components/v2/market-size";
 import { LiveReviews, WatchButton } from "@/components/v2/live-data";
+import { TranslateText } from "@/components/v2/translate";
 
 type Listing = { id: string; title: string; price: number | null; sales: number | null; revenue: number | null; rating: number | null;
   url: string | null; is_best_listing: boolean; data_confidence: number; relevance_score: number };
@@ -80,6 +81,7 @@ export default function ProductDetail() {
           <ProductImage src={p.image} alt={p.title} noImage={t("product.noImage")} />
           <div className="space-y-2 p-4">
             <h1 className="text-base font-semibold leading-snug">{p.title}</h1>
+            <TranslateText key={`${p.product_id}-${lang}`} text={p.title} refId={p.product_id} />
             <div className="flex flex-wrap gap-1.5">
               {p.brand && <Badge>{p.brand}</Badge>}
               {p.model_label && p.model_label !== "other" && <Badge color="var(--accent-2)">{p.model_label}</Badge>}

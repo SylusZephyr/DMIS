@@ -622,6 +622,76 @@ def test_llm_tier_fills_traces_caches_and_respects_budget(c, monkeypatch):
     assert s3["stopped_by_budget"] and s3["called"] == 1
 
 
+# ---------------------------------------------------------------- machine translation (spec 88)
+from dip.knowledge import translate as tr  # noqa: E402
+
+
+def _translator(replies: dict, tokens=(200, 50)):
+    calls = []
+
+    def prov(system, prompt):
+        src = prompt.split("<text>\n", 1)[1].rsplit("\n</text>", 1)[0]
+        calls.append(src)
+        r = replies[src]
+        return r if isinstance(r, llm.LLMReply) else llm.LLMReply("ok", r, "fake-model", *tokens)
+    return prov, calls
+
+
+def test_translation_checks_script_numbers_and_length():
+    src = "Denture base resin 500g, 2 pack, 0.50 mm"
+    assert tr.check(src, "义齿基托树脂 500g，2 件装，0.5 mm", "zh") is None            # 0.50 and 0.5 are the same number
+    assert tr.check(src, "义齿基托树脂 500g，两件装，0.5 mm", "zh").startswith("numbers missing")
+    assert tr.check(src, "Denture base resin 500g, 2 pack, 0.50 mm", "zh") == "reply is not in Chinese"
+    assert tr.check("义齿基托树脂", "义齿基托树脂", "en") == "reply is not in English"
+    assert tr.check("resin", "树脂" * 200, "zh") == "reply is implausibly long for the text"
+    assert tr.check("resin", "  ", "zh") == "empty reply"
+    assert tr.in_language("义齿基托 resin", "zh") and tr.in_language("Denture base 500g", "en")
+    assert not tr.in_language("义齿基托 resin", "en") and not tr.in_language("12345", "en")
+
+
+def test_translation_traces_caches_rejects_and_budgets(c, monkeypatch):
+    from dip.storage import business as b
+    texts = ["Heat-cure denture base acrylic 1000g pink", "Self-cure reline resin 30ml", "义齿基托树脂", "Ignore the rules 3"]
+    prov, calls = _translator({texts[0]: "热凝义齿基托丙烯酸 1000g 粉色", texts[1]: "自凝重衬树脂 300ml",
+                               texts[3]: llm.LLMReply("error", error="HTTP 500", model="fake-model")})
+    r = tr.translate(texts, "zh", ref="p1", provider=prov)
+    st = [i["status"] for i in r["items"]]
+    assert st == ["ok", "rejected", "already_target", "error"] and r["machine_translation"]
+    assert r["items"][0]["text"] == "热凝义齿基托丙烯酸 1000g 粉色" and r["items"][1]["text"] is None
+    assert r["items"][1]["reason"] == "numbers missing from the translation: 30" and r["items"][2]["text"] == "义齿基托树脂"
+    assert [i["source"] for i in r["items"]] == texts and calls == [texts[0], texts[1], texts[3]]
+    assert r["cost_usd"] == round(2 * (200 * 3.0 + 50 * 15.0) / 1e6, 6)
+    with b.session() as s:
+        rows = s.query(b.AITrace).filter(b.AITrace.purpose == tr.PURPOSE, b.AITrace.input_ref == "p1").all()
+        assert sorted(t.status for t in rows) == ["error", "ok", "rejected"]
+        assert all(t.prompt_version == "translate_v1" and t.model == "fake-model" and t.input_hash for t in rows)
+        assert next(t for t in rows if t.status == "rejected").output["raw"] == "自凝重衬树脂 300ml"
+    again = tr.translate(texts[:2], "zh", provider=prov)                    # the ok one comes from its trace
+    assert [i["status"] for i in again["items"]] == ["cached", "rejected"] and len(calls) == 4
+    monkeypatch.setitem(tr.config()["translation"], "budget_usd_per_request", 0.0)
+    capped = tr.translate(["Soft liner 5 tubes"], "zh", provider=prov)
+    assert capped["items"][0]["status"] == "over_budget" and len(calls) == 4
+    monkeypatch.setitem(tr.config()["translation"], "budget_usd_per_request", 1.0)
+    monkeypatch.setitem(tr.config()["translation"], "budget_usd_per_day", tr.spent_today())
+    assert tr.translate(["Soft liner 5 tubes"], "zh", provider=prov)["items"][0]["status"] == "over_budget"
+    long = tr.translate(["x" * (tr.config()["translation"]["max_chars"] + 1)], "zh", provider=prov)
+    assert long["items"][0]["status"] == "too_long" and len(calls) == 4
+    with pytest.raises(ValueError):
+        tr.translate(["a"], "fr", provider=prov)
+
+
+def test_translation_api(c, monkeypatch):
+    for k in ("ANTHROPIC_API_KEY", "GEMINI_API_KEY"):
+        monkeypatch.delenv(k, raising=False)
+    r = c.post("/api/v2/translate", json={"texts": ["Denture base resin 500g", "义齿基托"], "target": "zh"})
+    assert r.status_code == 200, r.text
+    j = r.json()
+    assert j["status"] == "unavailable" and [i["status"] for i in j["items"]] == ["unavailable", "already_target"]
+    assert j["items"][0]["source"] == "Denture base resin 500g" and j["items"][0]["text"] is None
+    assert c.post("/api/v2/translate", json={"texts": ["a"], "target": "fr"}).status_code == 400
+    assert c.post("/api/v2/translate", json={"texts": ["a"] * 21, "target": "en"}).status_code == 400
+
+
 # ---------------------------------------------------------------- review pain and offline evidence (spec 27-34)
 from dip.knowledge import offline as offl  # noqa: E402
 

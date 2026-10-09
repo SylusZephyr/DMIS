@@ -43,7 +43,7 @@ export async function get<T = unknown>(path: string, init?: RequestInit): Promis
 // POSTs that only compute an answer (no stored state changes). Every other successful POST is a mutation
 // and marks all cached GET responses stale, so pages that are open refetch and others refetch on next visit.
 const READ_ONLY_POST = [/^\/telemetry\//, /^\/imports\/preview/, /^\/analyst\/ask/, /^\/shopping\/recommend/, /^\/launch\/simulate/, /^\/launch\/compare/,
-  /^\/economics\//, /^\/sourcing\/concept/];
+  /^\/economics\//, /^\/sourcing\/concept/, /^\/translate$/];
 let onMutation: (() => void) | null = null;
 /** Registered by the query provider (lib/query.tsx); kept as a callback so this module stays React-free. */
 export function setMutationListener(fn: (() => void) | null) { onMutation = fn; }

@@ -945,4 +945,13 @@ export const en = {
     modelled: "modelled {v}", notValidated: "not validated", validated: "validated",
     modelledTip: "Demand-model estimate with its 95% range. 'Not validated' means the model failed its hold-out check for this market",
   },
+  translate: {
+    button: "Translate", machine: "Machine translation:", already: "Already in your language.",
+    status: {
+      unavailable: "Translation needs an AI provider key (ANTHROPIC_API_KEY or GEMINI_API_KEY) on the server.",
+      disabled: "Translation is turned off in the configuration.", over_budget: "Today's translation budget is used up.",
+      too_long: "This text is too long to translate.", rejected: "The translation failed its checks (numbers or language), so it is not shown.",
+      error: "Translation failed; try again later.",
+    },
+  },
 };

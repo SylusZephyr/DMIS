@@ -57,7 +57,7 @@ def _cfg() -> dict:
 
 
 # ---------------------------------------------------------------- providers
-def _anthropic(system: str, prompt: str) -> LLMReply:
+def _anthropic(system: str, prompt: str, max_tokens: int | None = None) -> LLMReply:
     c = _cfg()
     key = os.environ.get("ANTHROPIC_API_KEY", "").strip()
     if not key:
@@ -68,7 +68,7 @@ def _anthropic(system: str, prompt: str) -> LLMReply:
         return LLMReply("unavailable", error="anthropic package not installed", model=c["model"])
     try:
         r = anthropic.Anthropic(api_key=key, timeout=float(c.get("timeout_seconds", 30))).messages.create(
-            model=c["model"], max_tokens=int(c["max_tokens"]), system=system, messages=[{"role": "user", "content": prompt}])
+            model=c["model"], max_tokens=int(max_tokens or c["max_tokens"]), system=system, messages=[{"role": "user", "content": prompt}])
     except Exception as exc:  # noqa: BLE001 -- any SDK / network failure is a traced error, never a crash
         return LLMReply("error", error=f"{type(exc).__name__}: {exc}"[:500], model=c["model"])
     text = next((b.text for b in r.content if isinstance(getattr(b, "text", None), str)), "")
@@ -83,7 +83,7 @@ def _gemini_model() -> str:
     return _cfg().get("gemini_model") or analyst_config()["gemini"]["model"]
 
 
-def _gemini(system: str, prompt: str) -> LLMReply:
+def _gemini(system: str, prompt: str, max_tokens: int | None = None, json_mode: bool = True) -> LLMReply:
     c = _cfg()
     model = _gemini_model()
     key = os.environ.get("GEMINI_API_KEY", "").strip()
@@ -92,7 +92,8 @@ def _gemini(system: str, prompt: str) -> LLMReply:
     import httpx
 
     body = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "systemInstruction": {"parts": [{"text": system}]},
-            "generationConfig": {"temperature": 0, "maxOutputTokens": int(c["max_tokens"]), "responseMimeType": "application/json"}}
+            "generationConfig": {"temperature": 0, "maxOutputTokens": int(max_tokens or c["max_tokens"]),
+                                 **({"responseMimeType": "application/json"} if json_mode else {})}}
     try:
         r = httpx.post(f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent", json=body,
                        headers={"x-goog-api-key": key}, timeout=float(c.get("timeout_seconds", 30)))

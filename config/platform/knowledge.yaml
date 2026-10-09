@@ -241,6 +241,19 @@ llm:
   timeout_seconds: 30
   # gemini_model: unset -> the analyst's Gemini model (config/platform/analyst.yaml)
 
+# ---------------------------------------------------------------- Machine translation, spec 88
+# Listing / supplier text translated on request (English <-> Simplified Chinese) with the llm provider and model
+# above. The original text is always kept and shown; a translation is labelled as machine output. Each text is one
+# traced call, reused from its trace when the same text was translated before (never paid twice).
+translation:
+  enabled: true
+  prompt_version: translate_v1
+  max_texts_per_request: 20
+  max_chars: 2000               # longer texts are refused, not cut (a cut translation would read as complete)
+  max_tokens: 1500
+  budget_usd_per_request: 0.20
+  budget_usd_per_day: 2.00      # across all users; counted from the ai_traces cost column
+
 # ---------------------------------------------------------------- Dynamic taxonomy discovery, spec 9-10, 103-104
 # A candidate dimension (commercial attribute) becomes a taxonomy level only when the data supports it:
 # it covers enough products, forms groups of real size, and separates the market commercially (price

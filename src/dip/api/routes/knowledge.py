@@ -784,3 +784,38 @@ def knowledge_accuracy(market: str, principal: Principal = Depends(require("mark
         "ranking_stability": ev.ranking_stability(opps, kcfg()["opportunity"]["weights"]) if len(opps) else None,
         "note": "rates appear only with at least evaluation.min_labels labelled rows; a review band is counted apart, not as an error",
     })
+
+
+# ---------------------------------------------------------------- machine translation (spec 88)
+class TranslateIn(BaseModel):
+    texts: list[str]
+    target: str                   # en | zh
+    ref: str | None = None        # what the texts belong to (e.g. a product id), recorded in the trace
+
+
+class TranslationItem(BaseModel):
+    source: str
+    text: str | None = None
+    status: str                   # ok | cached | already_target | rejected | error | too_long | unavailable | over_budget | disabled
+    reason: str | None = None
+
+
+class TranslateResponse(BaseModel):
+    target: str
+    model: str
+    status: str                   # ran | unavailable | disabled
+    machine_translation: bool
+    cost_usd: float
+    items: list[TranslationItem]
+
+
+@router.post("/translate", response_model=TranslateResponse, dependencies=[Depends(require("markets", "read"))])
+def translate_texts(body: TranslateIn):
+    """Machine-translate listing or supplier text (English <-> Simplified Chinese). The source text is returned with
+    every item and is never changed; each translation is traced, checked (script, numbers kept) and budgeted."""
+    from dip.knowledge import translate
+
+    try:
+        return translate.translate(body.texts, body.target, ref=body.ref)
+    except ValueError as exc:
+        raise HTTPException(400, str(exc)) from exc

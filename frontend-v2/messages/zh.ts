@@ -945,4 +945,13 @@ export const zh = {
     modelled: "模型估计 {v}", notValidated: "未通过验证", validated: "已验证",
     modelledTip: "需求模型估计及其 95% 区间。“未通过验证”表示该市场的模型未通过留出检验",
   },
+  translate: {
+    button: "翻译", machine: "机器翻译：", already: "已是当前语言。",
+    status: {
+      unavailable: "翻译需要在服务器上配置 AI 服务密钥（ANTHROPIC_API_KEY 或 GEMINI_API_KEY）。",
+      disabled: "配置中已关闭翻译。", over_budget: "今日翻译预算已用完。",
+      too_long: "文本过长，无法翻译。", rejected: "翻译未通过校验（数字或语言），因此不予显示。",
+      error: "翻译失败，请稍后再试。",
+    },
+  },
 };
