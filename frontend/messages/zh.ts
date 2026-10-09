@@ -301,14 +301,15 @@ export const zh = {
   analyst: {
     title: "市场分析师", subtitle: "可用中文或英文提问。每个回答都是由指标引擎计算出的事实列表，每条都附有返回相同数字的 API 路径。可选的 AI 表述（Google Gemini）只能复述这些事实——回复中出现任何不在事实中的数字都会被拒绝。",
     placeholder: "例如：牙科模型我们应该卖什么？", useAi: "AI 表述（Gemini，需要 GEMINI_API_KEY）", ask: "提问",
-    how: "可回答：市场规模 · 最佳细分 · 应该卖什么 · 竞争对手 · 进入难度 · 毛利 · 上市假设（给出价格，可加成本）· 比较 · 分数为什么这样 · 上新动能。",
+    how: "可回答：市场规模 · 最佳细分 · 应该卖什么 · 竞争对手 · 进入难度 · 毛利 · 上市假设（给出价格，可加成本）· 比较 · 分数为什么这样 · 上新动能 · 客户投诉 · 产品类型 · 供应商 · 数据是否可信。",
     ex0: "牙科模型市场有多大？", ex1: "牙科模型我们应该卖什么？", ex2: "谁在领导牙科模型市场？",
     ex3: "进入牙科模型市场难度如何？", ex4: "如果在牙科模型以 $19.99 上市教学牙模、成本 $5 会怎样？",
     ex5: "为什么牙科模型排名第一的细分是这个分数？", ex6: "牙科模型的上新在加速吗？",
     emptyTitle: "还没有提问", emptySub: "选择上面的示例或输入您自己的问题。", intent: "意图", phrasedBy: "由 {m} 表述",
     modeAi: "AI + 事实", modeRejected: "AI 被拒 · 事实", modeComputed: "计算结果", aiNote: "未使用 AI 表述", facts: "计算出的事实", verify: "核对",
     intents: { size: "市场规模", opportunity: "机会", recommend: "卖什么", competitors: "竞争对手", entry: "进入", economics: "经济性",
-      growth: "动能", launch: "上市假设", compare: "比较", why: "原因", overview: "概览" },
+      growth: "动能", launch: "上市假设", compare: "比较", why: "原因", overview: "概览",
+      pain: "客户投诉", types: "产品类型", suppliers: "供应商", quality: "数据可信度" },
   },
   home: {
     toBoard: "卖什么——机会看板",

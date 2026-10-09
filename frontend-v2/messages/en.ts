@@ -301,14 +301,15 @@ export const en = {
   analyst: {
     title: "Market Analyst", subtitle: "Ask in English or Chinese. Every answer is a list of facts computed from the metrics engine, each with the API path that returns the same number. Optional AI phrasing (Google Gemini) may only restate those facts — a reply with any number not in the facts is rejected.",
     placeholder: "e.g. What should we sell in dental models?", useAi: "AI phrasing (Gemini, needs GEMINI_API_KEY)", ask: "Ask",
-    how: "Intents: market size · best segment · what to sell · competitors · entry difficulty · margins · launch what-if (give a price, optionally a cost) · compare · why a score is what it is · launch momentum.",
+    how: "Intents: market size · best segment · what to sell · competitors · entry difficulty · margins · launch what-if (give a price, optionally a cost) · compare · why a score is what it is · launch momentum · customer complaints · product types · suppliers · can the numbers be trusted.",
     ex0: "How big is the dental models market?", ex1: "What should we sell in dental models?", ex2: "Who leads dental models?",
     ex3: "How hard is it to enter dental models?", ex4: "What happens if we launch a teaching teeth model at $19.99 with cost $5 in dental models?",
     ex5: "Why does the top dental models segment score this way?", ex6: "Are launches speeding up in dental models?",
     emptyTitle: "No questions yet", emptySub: "Pick an example above or type your own.", intent: "intent", phrasedBy: "phrased by {m}",
     modeAi: "AI + facts", modeRejected: "AI rejected · facts", modeComputed: "computed", aiNote: "AI phrasing not used", facts: "Computed facts", verify: "verify",
     intents: { size: "market size", opportunity: "opportunity", recommend: "what to sell", competitors: "competitors", entry: "entry", economics: "economics",
-      growth: "momentum", launch: "launch what-if", compare: "compare", why: "why", overview: "overview" },
+      growth: "momentum", launch: "launch what-if", compare: "compare", why: "why", overview: "overview",
+      pain: "customer complaints", types: "product types", suppliers: "suppliers", quality: "data trust" },
   },
   home: {
     toBoard: "What to sell — the Opportunity Board",

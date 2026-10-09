@@ -324,3 +324,12 @@ test("product page translates the listing title into the interface language, lab
   // without an AI key on the server the page says so; with one it shows the labelled translation
   await expect(page.getByText(zh.translate.status.unavailable).or(page.getByText(zh.translate.machine))).toBeVisible();
 });
+
+test("analyst answers a complaints question and names the intent in words", async ({ page }) => {
+  await page.goto("/analyst");
+  const box = page.getByRole("textbox").first();
+  await box.fill("What do customers complain about?");
+  await box.press("Enter");
+  await expect(page.getByText(en.analyst.intents.pain, { exact: true })).toBeVisible();
+  await expect(page.getByText("analyst.intents.", { exact: false })).toHaveCount(0);
+});
